@@ -271,14 +271,27 @@ ensure_service_account() {
     install -d -o root -g "${NODERED_GROUP}" -m 0750 /etc/node-red
 }
 
-ensure_nodesource_repo() {
-    local repo_rpm
-    repo_rpm="https://rpm.nodesource.com/pub_${NODE_MAJOR}.x/nodistro/repo/nodesource-release-nodistro-1.noarch.rpm"
-    log "A configurar repositório NodeSource para Node.js ${NODE_MAJOR}.x"
+ensure_nodejs_runtime() {
+    local installed_major node_version repo_file
+
+    log "A instalar Node.js ${NODE_MAJOR}.x e npm através do AlmaLinux AppStream"
     if rpm -q nodesource-release-nodistro >/dev/null 2>&1; then
         dnf remove -y nodesource-release-nodistro
     fi
-    dnf install -y "${repo_rpm}"
+    for repo_file in /etc/yum.repos.d/nodesource*.repo; do
+        [[ -e "${repo_file}" ]] || continue
+        rm -f -- "${repo_file}"
+    done
+
+    dnf module reset -y nodejs
+    dnf module install -y "nodejs:${NODE_MAJOR}/common" --allowerasing
+    command -v node >/dev/null 2>&1 || die "o pacote Node.js não instalou o comando node."
+    command -v npm >/dev/null 2>&1 || die "o pacote Node.js não instalou o comando npm."
+    node_version="$(node --version)"
+    installed_major="${node_version#v}"
+    installed_major="${installed_major%%.*}"
+    [[ "${installed_major}" == "${NODE_MAJOR}" ]] \
+        || die "Node.js ${NODE_MAJOR}.x esperado, mas foi instalado ${node_version}."
 }
 
 nginx_cert_dir() {

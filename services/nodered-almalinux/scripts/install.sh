@@ -15,8 +15,7 @@ dnf install -y \
 
 ensure_certbot_packages
 
-ensure_nodesource_repo
-dnf install -y nodejs --setopt=nodesource-nodejs.module_hotfixes=1 --allowerasing
+ensure_nodejs_runtime
 
 log "A instalar Node-RED ${NODERED_VERSION} e bcryptjs"
 npm install -g "node-red@${NODERED_VERSION}" bcryptjs@latest
