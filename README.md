@@ -11,6 +11,7 @@ operating services and applications on my machines.
 | Service | Platform | Description |
 | --- | --- | --- |
 | [Node-RED](services/nodered-almalinux/) | AlmaLinux 9 | Node-RED, Nginx, TLS, systemd, firewall, backups, and upgrades |
+| [NetBox manager](services/netbox-manager/) | Linux/systemd | Operate an existing NetBox: updates, plugins, validation, backups, and service control |
 
 ## Usage
 
