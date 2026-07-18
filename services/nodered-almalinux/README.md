@@ -104,7 +104,7 @@ alteram o sistema pedem `root` ou usam `sudo` automaticamente.
 | `make init` | Cria `.env` a partir de `.env.example`; falha se `.env` já existir. |
 | `make lint` | Valida a sintaxe Bash sem root, rede ou alterações no sistema. |
 | `make configure` | Regenera `settings.js`, o ambiente protegido, a unidade systemd e a configuração Nginx. |
-| `make bcrypt` | Pede uma password silenciosamente e imprime o respectivo bcrypt. Requer `make install`. |
+| `make bcrypt` | Pede uma password silenciosamente e imprime o respectivo bcrypt; instala `httpd-tools` se necessário. |
 | `make cert-selfsigned` | Gera/substitui o certificado TLS auto-assinado. |
 | `make upgrade` | Faz backup, actualiza o sistema Node.js/Node-RED/Nginx/acme.sh, configura e valida. |
 | `make upgrade-nodes` | Actualiza os nós adicionais da palette; pode introduzir incompatibilidades. |
@@ -158,12 +158,40 @@ caracteres especiais.
 | `NODERED_HTTP_NODE_PASSWORD` | Password em claro usada apenas para gerar o hash HTTP. |
 | `NODERED_HTTP_NODE_PASSWORD_HASH` | Hash bcrypt da password dos endpoints HTTP. |
 
-Para gerar um hash sem escrever a password no comando nem no histórico da shell:
+A autenticação do editor e da Admin API não protege automaticamente os
+endpoints criados pelos nós `HTTP In`. Com a opção global desactivada:
+
+```dotenv
+NODERED_HTTP_NODE_AUTH=false
+```
+
+os endpoints HTTP In não têm uma autenticação global fornecida pelo Node-RED.
+Mesmo assim, cada flow pode implementar a sua própria autenticação individual,
+por exemplo validando um token, uma API key ou um header através de nós
+`Function`, `Change` ou outra lógica do flow.
+
+Para exigir autenticação Basic HTTP global em todos os endpoints `HTTP In`:
+
+```dotenv
+NODERED_HTTP_NODE_AUTH=true
+NODERED_HTTP_NODE_USER=api
+NODERED_HTTP_NODE_PASSWORD=
+NODERED_HTTP_NODE_PASSWORD_HASH='$2b$10$...'
+```
+
+Quando esta opção está activa, todos os clientes têm de enviar credenciais
+HTTP válidas. Isto também se aplica a APIs, webhooks e callbacks criados pelos
+flows, podendo exigir alterações nas integrações externas.
+
+Para gerar um hash antes da instalação, sem escrever a password no comando nem
+no histórico da shell:
 
 ```bash
 make bcrypt
 ```
 
+O alvo pede a password duas vezes e imprime apenas o hash. Se `htpasswd` não
+existir, instala o pacote `httpd-tools` através de `dnf` (com `root` ou `sudo`).
 Depois use o resultado, por exemplo:
 
 ```dotenv

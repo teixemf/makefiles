@@ -10,7 +10,7 @@ check_os
 log "A instalar pacotes de base"
 dnf install -y \
     ca-certificates curl openssl nginx firewalld cronie \
-    policycoreutils-python-utils git tar gzip findutils
+    policycoreutils-python-utils httpd-tools git tar gzip findutils
 
 ensure_nodesource_repo
 dnf install -y nodejs --setopt=nodesource-nodejs.module_hotfixes=1 --allowerasing
