@@ -94,7 +94,12 @@ if [[ ! -f "${NODERED_HOME}/package.json" ]]; then
 fi
 chown -R "${NODERED_USER}:${NODERED_GROUP}" "${NODERED_HOME}"
 
+node_bin="$(command -v node)"
 node_red_bin="$(command -v node-red)"
+node_red_entrypoint="$(readlink -f -- "${node_red_bin}" 2>/dev/null || true)"
+[[ -x "${node_bin}" ]] || die "the Node.js executable is not executable: ${node_bin}"
+[[ -n "${node_red_entrypoint}" && -r "${node_red_entrypoint}" ]] \
+    || die "the Node-RED entrypoint could not be resolved from ${node_red_bin}"
 log "A gerar unidade systemd"
 service_tmp="$(mktemp)"
 cat > "${service_tmp}" <<EOF
@@ -111,7 +116,7 @@ Group=${NODERED_GROUP}
 WorkingDirectory=${NODERED_HOME}
 Environment=HOME=${NODERED_HOME}
 EnvironmentFile=/etc/node-red/environment
-ExecStart=${node_red_bin} --userDir ${NODERED_HOME} --settings ${NODERED_HOME}/settings.js
+ExecStart=${node_bin} ${node_red_entrypoint} --userDir ${NODERED_HOME} --settings ${NODERED_HOME}/settings.js
 KillSignal=SIGINT
 Restart=on-failure
 RestartSec=10
