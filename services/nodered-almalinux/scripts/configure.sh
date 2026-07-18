@@ -88,7 +88,9 @@ rm -f "${settings_tmp}"
 if [[ ! -f "${NODERED_HOME}/package.json" ]]; then
     log "A inicializar package.json do userDir"
     runuser -u "${NODERED_USER}" -- \
-        env HOME="${NODERED_HOME}" npm --prefix "${NODERED_HOME}" init -y >/dev/null
+        env HOME="${NODERED_HOME}" \
+        bash -c 'cd -- "$1" && exec npm --prefix "$1" init -y' \
+        _ "${NODERED_HOME}" >/dev/null
 fi
 chown -R "${NODERED_USER}:${NODERED_GROUP}" "${NODERED_HOME}"
 
