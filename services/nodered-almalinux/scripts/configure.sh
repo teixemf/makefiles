@@ -10,7 +10,7 @@ ensure_service_account
 
 command -v node >/dev/null || die "Node.js não está instalado."
 command -v npm >/dev/null || die "npm não está instalado."
-command -v node-red >/dev/null || die "Node-RED não está instalado."
+npm list -g node-red --depth=0 >/dev/null 2>&1 || die "Node-RED não está instalado."
 npm list -g bcryptjs --depth=0 >/dev/null 2>&1 || npm install -g bcryptjs@latest
 
 resolve_auth_material
@@ -95,11 +95,11 @@ fi
 chown -R "${NODERED_USER}:${NODERED_GROUP}" "${NODERED_HOME}"
 
 node_bin="$(command -v node)"
-node_red_bin="$(command -v node-red)"
-node_red_entrypoint="$(readlink -f -- "${node_red_bin}" 2>/dev/null || true)"
+npm_global_root="$(npm root -g)"
+node_red_entrypoint="${npm_global_root}/node-red/red.js"
 [[ -x "${node_bin}" ]] || die "the Node.js executable is not executable: ${node_bin}"
-[[ -n "${node_red_entrypoint}" && -r "${node_red_entrypoint}" ]] \
-    || die "the Node-RED entrypoint could not be resolved from ${node_red_bin}"
+[[ -r "${node_red_entrypoint}" ]] \
+    || die "the Node-RED entrypoint is missing: ${node_red_entrypoint}"
 log "A gerar unidade systemd"
 service_tmp="$(mktemp)"
 cat > "${service_tmp}" <<EOF
