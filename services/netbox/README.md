@@ -1,4 +1,4 @@
-# NetBox manager
+# NetBox
 
 Self-contained operational tooling for an existing NetBox installation. It
 does not install NetBox or create its database, account, reverse proxy, or

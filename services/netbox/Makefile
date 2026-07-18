@@ -20,7 +20,7 @@ endef
 
 help:
 	@printf '%s\n' \
-	  'NetBox manager — available targets:' \
+	  'NetBox — available targets:' \
 	  '' \
 	  '  make help                  show this help' \
 	  '  make init                  create .env from .env.example' \
