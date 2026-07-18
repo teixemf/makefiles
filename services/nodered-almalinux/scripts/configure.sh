@@ -155,8 +155,9 @@ server {
 }
 
 server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
     server_name ${FQDN};
 
     ssl_certificate     ${cert_dir}/fullchain.pem;
