@@ -63,8 +63,14 @@ fi
 
 cert="$(nginx_cert_dir)/fullchain.pem"
 if [[ -r "${cert}" ]]; then
-    ok "certificado presente ($(cert_kind))"
+    certificate_kind="$(cert_kind)"
+    ok "certificado presente (${certificate_kind})"
     openssl x509 -in "${cert}" -noout -subject -issuer -dates
+    if [[ "${certificate_kind}" == "letsencrypt-prod" ]]; then
+        check "timer de renovação Certbot activo" systemctl is-active --quiet certbot-renew.timer
+        check "configuração de renovação Certbot presente" \
+            test -r "${CERTBOT_CONFIG_DIR}/renewal/${FQDN}.conf"
+    fi
 else
     warn "FALHOU: certificado ausente"
     failures=$((failures + 1))

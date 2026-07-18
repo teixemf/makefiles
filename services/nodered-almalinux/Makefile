@@ -33,7 +33,7 @@ help:
 	  '  make cert-selfsigned    instala/substitui por certificado auto-assinado' \
 	  '  make cert-le-stag       testa emissão Let'\''s Encrypt DNS-01 staging' \
 	  '  make cert-le-prod       emite/instala Let'\''s Encrypt DNS-01 produção' \
-	  '  make upgrade            backup + upgrade Node.js/Node-RED/Nginx/acme.sh' \
+	  '  make upgrade            backup + upgrade Node.js/Node-RED/Nginx/Certbot' \
 	  '  make upgrade-nodes      actualiza nós adicionais em NODERED_HOME' \
 	  '  make upgrade-system     dnf upgrade completo + make upgrade' \
 	  '  make backup             cria backup local protegido' \
@@ -41,8 +41,8 @@ help:
 	  '  make status             estado resumido' \
 	  '  make restart            reinicia Node-RED e Nginx' \
 	  '  make logs               segue apenas os logs do Node-RED' \
-	  '  make logs-nginx        segue apenas os logs do Nginx' \
-	  '  make logs-all          segue os logs do Node-RED e Nginx' \
+	  '  make logs-nginx         segue apenas os logs do Nginx' \
+	  '  make logs-all           segue os logs do Node-RED e Nginx' \
 	  '  make versions           mostra versões instaladas' \
 	  '' \
 	  'Pode usar outro ficheiro: make ENV_FILE=/caminho/instancia.env install'

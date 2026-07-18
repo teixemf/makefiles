@@ -46,14 +46,22 @@ load_env() {
     : "${NODERED_HTTP_NODE_PASSWORD:=}"
     : "${NODERED_HTTP_NODE_PASSWORD_HASH:=}"
     : "${SELF_SIGNED_DAYS:=825}"
-    : "${ACME_EMAIL:=}"
-    : "${ACME_DNS_PROVIDER:=dns_cf}"
-    : "${ACME_DNS_SLEEP:=120}"
-    : "${ACME_KEY_LENGTH:=ec-256}"
-    : "${ACME_GIT_REF:=master}"
-    : "${ACME_HOME:=/opt/acme.sh}"
-    : "${ACME_CONFIG_ROOT:=/etc/acme.sh}"
-    : "${ACME_CERT_ROOT:=/var/lib/acme.sh}"
+    : "${CERTBOT_EMAIL:=}"
+    : "${CERTBOT_DNS_PROVIDER:=cloudflare}"
+    : "${CERTBOT_DNS_PROPAGATION_SECONDS:=120}"
+    : "${CERTBOT_KEY_TYPE:=ecdsa}"
+    : "${CERTBOT_ELLIPTIC_CURVE:=secp256r1}"
+    : "${CERTBOT_RSA_KEY_SIZE:=3072}"
+    CERTBOT_CONFIG_DIR=/etc/letsencrypt
+    CERTBOT_WORK_DIR=/var/lib/letsencrypt
+    CERTBOT_LOGS_DIR=/var/log/letsencrypt
+    CERTBOT_STAGING_CONFIG_DIR=/etc/letsencrypt-staging
+    CERTBOT_STAGING_WORK_DIR=/var/lib/letsencrypt-staging
+    CERTBOT_STAGING_LOGS_DIR=/var/log/letsencrypt-staging
+    : "${CERTBOT_DNS_CREDENTIALS_FILE:=${CERTBOT_CONFIG_DIR}/dns-${CERTBOT_DNS_PROVIDER}-${FQDN}.ini}"
+    : "${CERTBOT_DEPLOY_HOOK:=/usr/local/libexec/nodered-certbot-deploy-${FQDN}}"
+    : "${CLOUDFLARE_API_TOKEN:=}"
+    export -n CLOUDFLARE_API_TOKEN
     : "${UPGRADE_PALETTE_NODES:=false}"
     : "${BACKUP_ROOT:=/var/backups/nodered}"
     : "${BACKUP_RETENTION_DAYS:=30}"
@@ -65,8 +73,12 @@ load_env() {
     export NODE_RED_CREDENTIAL_SECRET NODERED_HTTP_NODE_AUTH
     export NODERED_HTTP_NODE_USER NODERED_HTTP_NODE_PASSWORD
     export NODERED_HTTP_NODE_PASSWORD_HASH SELF_SIGNED_DAYS
-    export ACME_EMAIL ACME_DNS_PROVIDER ACME_DNS_SLEEP ACME_KEY_LENGTH
-    export ACME_GIT_REF ACME_HOME ACME_CONFIG_ROOT ACME_CERT_ROOT
+    export CERTBOT_EMAIL CERTBOT_DNS_PROVIDER CERTBOT_DNS_PROPAGATION_SECONDS
+    export CERTBOT_KEY_TYPE CERTBOT_ELLIPTIC_CURVE CERTBOT_RSA_KEY_SIZE
+    export CERTBOT_CONFIG_DIR CERTBOT_WORK_DIR CERTBOT_LOGS_DIR
+    export CERTBOT_STAGING_CONFIG_DIR CERTBOT_STAGING_WORK_DIR
+    export CERTBOT_STAGING_LOGS_DIR CERTBOT_DNS_CREDENTIALS_FILE
+    export CERTBOT_DEPLOY_HOOK
     export UPGRADE_PALETTE_NODES BACKUP_ROOT BACKUP_RETENTION_DAYS
     export ALLOW_RHEL_COMPAT
 
@@ -86,20 +98,31 @@ validate_env() {
         || die "NODERED_PORT inválido."
     [[ "${NODERED_SESSION_SECONDS}" =~ ^[0-9]+$ ]] || die "NODERED_SESSION_SECONDS inválido."
     [[ "${SELF_SIGNED_DAYS}" =~ ^[0-9]+$ ]] || die "SELF_SIGNED_DAYS inválido."
-    [[ "${ACME_DNS_SLEEP}" =~ ^[0-9]+$ ]] || die "ACME_DNS_SLEEP inválido."
-    [[ "${ACME_KEY_LENGTH}" =~ ^(ec-256|ec-384|2048|3072|4096)$ ]] \
-        || die "ACME_KEY_LENGTH inválido."
-    [[ "${ACME_GIT_REF}" =~ ^[A-Za-z0-9][A-Za-z0-9._/-]*$ ]] \
-        || die "ACME_GIT_REF inválido."
+    [[ "${CERTBOT_DNS_PROVIDER}" =~ ^[a-z0-9][a-z0-9-]*$ ]] \
+        || die "CERTBOT_DNS_PROVIDER inválido."
+    [[ "${CERTBOT_DNS_PROPAGATION_SECONDS}" =~ ^[0-9]+$ ]] \
+        || die "CERTBOT_DNS_PROPAGATION_SECONDS inválido."
+    [[ "${CERTBOT_KEY_TYPE}" =~ ^(ecdsa|rsa)$ ]] \
+        || die "CERTBOT_KEY_TYPE deve ser ecdsa ou rsa."
+    [[ "${CERTBOT_ELLIPTIC_CURVE}" =~ ^(secp256r1|secp384r1)$ ]] \
+        || die "CERTBOT_ELLIPTIC_CURVE inválido."
+    [[ "${CERTBOT_RSA_KEY_SIZE}" =~ ^(2048|3072|4096)$ ]] \
+        || die "CERTBOT_RSA_KEY_SIZE inválido."
     [[ "${BACKUP_RETENTION_DAYS}" =~ ^[0-9]+$ ]] || die "BACKUP_RETENTION_DAYS inválido."
     [[ "${NODERED_BIND}" == "127.0.0.1" ]] \
         || die "por segurança, NODERED_BIND deve ser 127.0.0.1."
     [[ "${NODERED_HTTP_NODE_USER}" =~ ^[A-Za-z0-9_.@-]+$ ]] || die "NODERED_HTTP_NODE_USER inválido."
     [[ "${NODERED_HOME}" =~ ^/[A-Za-z0-9._/-]+$ ]] || die "NODERED_HOME tem de ser absoluto e sem espaços."
-    [[ "${ACME_HOME}" =~ ^/[A-Za-z0-9._/-]+$ &&
-       "${ACME_CONFIG_ROOT}" =~ ^/[A-Za-z0-9._/-]+$ &&
-       "${ACME_CERT_ROOT}" =~ ^/[A-Za-z0-9._/-]+$ ]] \
-        || die "os caminhos ACME têm de ser absolutos e sem espaços."
+    local certbot_path
+    for certbot_path in \
+        "${CERTBOT_CONFIG_DIR}" "${CERTBOT_WORK_DIR}" "${CERTBOT_LOGS_DIR}" \
+        "${CERTBOT_STAGING_CONFIG_DIR}" "${CERTBOT_STAGING_WORK_DIR}" \
+        "${CERTBOT_STAGING_LOGS_DIR}" "${CERTBOT_DNS_CREDENTIALS_FILE}" \
+        "${CERTBOT_DEPLOY_HOOK}"
+    do
+        [[ "${certbot_path}" =~ ^/[A-Za-z0-9._/-]+$ ]] \
+            || die "os caminhos Certbot têm de ser absolutos e sem espaços."
+    done
     [[ "${NODERED_HTTP_NODE_AUTH}" =~ ^(true|false)$ ]] || die "NODERED_HTTP_NODE_AUTH deve ser true ou false."
     [[ "${ALLOW_RHEL_COMPAT}" =~ ^(true|false)$ ]] || die "ALLOW_RHEL_COMPAT deve ser true ou false."
 }
@@ -129,7 +152,9 @@ install_atomic() {
     local source="$1" destination="$2" mode="$3" owner="${4:-root}" group="${5:-root}"
     local dir tmp
     dir="$(dirname -- "${destination}")"
-    install -d -o "${owner}" -g "${group}" -m 0755 "${dir}"
+    if [[ ! -d "${dir}" ]]; then
+        install -d -o "${owner}" -g "${group}" -m 0755 "${dir}"
+    fi
     tmp="$(mktemp "${dir}/.$(basename "${destination}").XXXXXX")"
     cp -- "${source}" "${tmp}"
     chown "${owner}:${group}" "${tmp}"
@@ -239,18 +264,6 @@ ensure_nodesource_repo() {
         dnf remove -y nodesource-release-nodistro
     fi
     dnf install -y "${repo_rpm}"
-}
-
-acme_cmd() {
-    "${ACME_HOME}/acme.sh" \
-        --home "${ACME_HOME}" \
-        --config-home "$1" \
-        --cert-home "$2" \
-        "${@:3}"
-}
-
-acme_is_ecc() {
-    [[ "${ACME_KEY_LENGTH}" == ec-* ]]
 }
 
 nginx_cert_dir() {

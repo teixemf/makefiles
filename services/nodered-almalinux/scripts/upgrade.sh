@@ -2,7 +2,7 @@
 set -Eeuo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/common.sh"
-source "${SCRIPT_DIR}/acme-lib.sh"
+source "${SCRIPT_DIR}/certbot-lib.sh"
 
 require_root
 load_env
@@ -12,8 +12,11 @@ check_os
 
 log "A actualizar dependências RPM"
 dnf upgrade -y \
-    ca-certificates curl openssl nginx firewalld cronie \
-    policycoreutils-python-utils git tar gzip findutils
+    ca-certificates curl openssl nginx firewalld \
+    policycoreutils-python-utils httpd-tools tar gzip findutils
+
+ensure_certbot_packages
+dnf upgrade -y certbot "$(certbot_plugin_package)"
 
 ensure_nodesource_repo
 dnf install -y nodejs --setopt=nodesource-nodejs.module_hotfixes=1 --allowerasing
@@ -33,11 +36,6 @@ fi
 
 if [[ "${UPGRADE_PALETTE_NODES}" == "true" ]]; then
     "${SCRIPT_DIR}/upgrade-nodes.sh"
-fi
-
-if [[ -d "${ACME_HOME}/.git" ]]; then
-    log "A actualizar acme.sh"
-    checkout_acme_ref
 fi
 
 "${SCRIPT_DIR}/configure.sh"

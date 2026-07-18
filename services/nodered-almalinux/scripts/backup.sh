@@ -17,11 +17,13 @@ for path in \
     /etc/node-red \
     "/etc/nginx/tls/${FQDN}" \
     /etc/nginx/conf.d/nodered.conf \
-    "${ACME_CONFIG_ROOT}" \
-    "${ACME_CERT_ROOT}" \
+    "${CERTBOT_CONFIG_DIR}" \
+    "${CERTBOT_WORK_DIR}" \
+    "${CERTBOT_STAGING_CONFIG_DIR}" \
+    "${CERTBOT_STAGING_WORK_DIR}" \
+    "${CERTBOT_DEPLOY_HOOK}" \
     /etc/systemd/system/nodered.service \
-    /etc/systemd/system/acme-nodered-renew.service \
-    /etc/systemd/system/acme-nodered-renew.timer
+    /etc/sysconfig/certbot
 do
     [[ -e "${path}" ]] && paths+=("${path#/}")
 done

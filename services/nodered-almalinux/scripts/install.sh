@@ -2,6 +2,7 @@
 set -Eeuo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/common.sh"
+source "${SCRIPT_DIR}/certbot-lib.sh"
 
 require_root
 load_env
@@ -9,8 +10,10 @@ check_os
 
 log "A instalar pacotes de base"
 dnf install -y \
-    ca-certificates curl openssl nginx firewalld cronie \
-    policycoreutils-python-utils httpd-tools git tar gzip findutils
+    ca-certificates curl openssl nginx firewalld \
+    policycoreutils-python-utils httpd-tools tar gzip findutils
+
+ensure_certbot_packages
 
 ensure_nodesource_repo
 dnf install -y nodejs --setopt=nodesource-nodejs.module_hotfixes=1 --allowerasing
@@ -30,7 +33,6 @@ fi
 
 log "A activar serviços e firewall"
 systemctl enable --now firewalld
-systemctl enable crond
 firewall-cmd --permanent --add-service=http
 firewall-cmd --permanent --add-service=https
 firewall-cmd --permanent --remove-port="${NODERED_PORT}/tcp" >/dev/null 2>&1 || true

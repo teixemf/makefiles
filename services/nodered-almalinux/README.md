@@ -17,7 +17,7 @@ Execute os comandos a partir de `services/nodered-almalinux/`:
 
 ```bash
 make init                 # cria .env sem substituir um ficheiro existente
-vim .env              # defina FQDN, autenticação e DNS
+vim .env                  # defina FQDN, autenticação e DNS
 chmod 600 .env
 make install              # instala Node-RED, Nginx, firewall e TLS inicial
 make validate             # valida a instalação
@@ -70,28 +70,32 @@ Quando o teste estiver correcto, emita o certificado confiável de produção:
 make cert-le-prod
 ```
 
-`make cert-le-prod` cria e activa automaticamente o
-`acme-nodered-renew.timer`. Não é necessário executar outro comando para o
-activar. Para consultar o estado, use opcionalmente:
+`make cert-le-prod` activa automaticamente o timer oficial
+`certbot-renew.timer`. Não é necessário executar outro comando para o activar.
+Para consultar o estado, use opcionalmente:
 
 ```bash
-systemctl list-timers acme-nodered-renew.timer
+systemctl list-timers certbot-renew.timer
 ```
 
-O staging é apenas um teste e não activa o timer de renovação. Os certificados
-staging não são confiáveis pelos browsers.
+O staging usa directórios Certbot separados, não instala o certificado no
+Nginx e não activa o timer. Assim, o teste nunca substitui um certificado de
+produção já instalado.
 
-O `.env` é interpretado como Bash e as variáveis são exportadas para o hook
-DNS do `acme.sh`. Para Cloudflare, por exemplo:
+O `.env` é interpretado como Bash. As credenciais são usadas para preparar o
+ficheiro protegido lido pelo plugin DNS do Certbot. Cloudflare é o fornecedor
+predefinido:
 
 ```dotenv
-ACME_DNS_PROVIDER=dns_cf
-CF_Token='token-restrito'
-CF_Account_ID='account-id'
+CERTBOT_DNS_PROVIDER=cloudflare
+CLOUDFLARE_API_TOKEN='token-restrito'
 ```
 
-Use um token restrito à zona necessária. O modo DNS manual não é usado porque
-não permite renovação automática.
+Use um token restrito à zona necessária, com `Zone:DNS:Edit` e
+`Zone:Zone:Read`. O token é escrito em
+`/etc/letsencrypt/dns-cloudflare-<FQDN>.ini`, com modo `0600`. O modo DNS
+manual não é usado porque não permite renovação automática sem hooks
+adicionais.
 
 ## Comandos acessórios
 
@@ -106,10 +110,10 @@ alteram o sistema pedem `root` ou usam `sudo` automaticamente.
 | `make configure` | Regenera `settings.js`, o ambiente protegido, a unidade systemd e a configuração Nginx. |
 | `make bcrypt` | Pede uma password silenciosamente e imprime o respectivo bcrypt; instala `httpd-tools` se necessário. |
 | `make cert-selfsigned` | Gera/substitui o certificado TLS auto-assinado. |
-| `make upgrade` | Faz backup, actualiza o sistema Node.js/Node-RED/Nginx/acme.sh, configura e valida. |
+| `make upgrade` | Faz backup, actualiza Node.js/Node-RED/Nginx/Certbot, configura e valida. |
 | `make upgrade-nodes` | Actualiza os nós adicionais da palette; pode introduzir incompatibilidades. |
 | `make upgrade-system` | Actualiza o sistema operativo e depois executa o upgrade do serviço. |
-| `make backup` | Cria um backup protegido da configuração, dados e ACME. |
+| `make backup` | Cria um backup protegido da configuração, dados e Certbot. |
 | `make validate` | Verifica serviço, autenticação, TLS, portas e firewall. |
 | `make status` | Mostra o estado do Node-RED, Nginx, firewall e certificados. |
 | `make restart` | Reinicia Node-RED e Nginx. |
@@ -199,31 +203,37 @@ NODERED_ADMIN_PASSWORD=
 NODERED_ADMIN_PASSWORD_HASH='$2b$10$...'
 ```
 
-### TLS e ACME
+### TLS e Certbot
 
 | Variável | Descrição |
 | --- | --- |
 | `SELF_SIGNED_DAYS` | Validade, em dias, do certificado auto-assinado. |
-| `ACME_EMAIL` | Email da conta Let's Encrypt; é obrigatório para `cert-le-stag` e `cert-le-prod`. |
-| `ACME_DNS_PROVIDER` | Hook DNS do `acme.sh`, por exemplo `dns_cf` para Cloudflare. |
-| `ACME_DNS_SLEEP` | Segundos de espera pela propagação do registo DNS. |
-| `ACME_KEY_LENGTH` | Chave do certificado: `ec-256`, `ec-384`, `2048`, `3072` ou `4096`. |
-| `ACME_GIT_REF` | Branch, tag ou ref do checkout do `acme.sh`; `master` é o valor do exemplo. |
-| `ACME_HOME` | Directório do checkout do `acme.sh`, normalmente `/opt/acme.sh`. |
-| `ACME_CONFIG_ROOT` | Configuração ACME separada por ambiente, normalmente `/etc/acme.sh`. |
-| `ACME_CERT_ROOT` | Dados/certificados ACME separados por ambiente, normalmente `/var/lib/acme.sh`. |
+| `CERTBOT_EMAIL` | Email da conta Let's Encrypt; obrigatório para `cert-le-stag` e `cert-le-prod`. |
+| `CERTBOT_DNS_PROVIDER` | Plugin DNS do Certbot. O valor predefinido é `cloudflare`. |
+| `CERTBOT_DNS_PROPAGATION_SECONDS` | Segundos de espera pela propagação do registo DNS. |
+| `CERTBOT_KEY_TYPE` | Tipo de chave: `ecdsa` ou `rsa`. |
+| `CERTBOT_ELLIPTIC_CURVE` | Curva usada com ECDSA: `secp256r1` ou `secp384r1`. |
+| `CERTBOT_RSA_KEY_SIZE` | Tamanho usado com RSA: `2048`, `3072` ou `4096`. |
+| `CERTBOT_DNS_CREDENTIALS_FILE` | Ficheiro protegido com as credenciais do plugin DNS; vazio usa um caminho específico por FQDN. |
+| `CERTBOT_DEPLOY_HOOK` | Hook que copia certificados renovados para o Nginx e o recarrega; vazio usa um nome específico por FQDN. |
+
+Os directórios de produção são os padrões do pacote
+(`/etc/letsencrypt`, `/var/lib/letsencrypt` e `/var/log/letsencrypt`) para que
+o timer oficial os renove sem configuração adicional. O
+`certbot-renew.timer` é um recurso global do sistema e verifica todos os
+certificados Certbot guardados em `/etc/letsencrypt`; cada certificado mantém
+o seu próprio hook de deploy.
 
 Para Cloudflare:
 
 | Variável | Descrição |
 | --- | --- |
-| `CF_Token` | Token Cloudflare restrito à edição DNS da zona necessária. |
-| `CF_Account_ID` | ID da conta Cloudflare. |
-| `CF_Zone_ID` | ID da zona, opcional quando o hook consegue determinar a zona. |
+| `CLOUDFLARE_API_TOKEN` | Token restrito à zona, com permissões DNS Edit e Zone Read. |
 
-Para outros fornecedores DNS, altere `ACME_DNS_PROVIDER` e adicione as
-variáveis exigidas pelo hook correspondente do `acme.sh`, como
-`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `OVH_AK`, `OVH_AS` e `OVH_CK`.
+Depois da primeira emissão, `CLOUDFLARE_API_TOKEN` pode ficar vazio no `.env`
+se `CERTBOT_DNS_CREDENTIALS_FILE` já existir com modo `0600`. Para outro
+fornecedor disponível no EPEL, altere `CERTBOT_DNS_PROVIDER` e crie previamente
+o ficheiro de credenciais no formato exigido pelo plugin correspondente.
 
 ### Backups e compatibilidade
 
@@ -244,7 +254,7 @@ make upgrade
 
 Este alvo cria um backup, actualiza os pacotes RPM, garante `NODE_MAJOR`,
 actualiza Node-RED para `NODERED_VERSION`, executa `npm rebuild`, actualiza o
-checkout `acme.sh`, regenera a configuração e valida os serviços.
+Certbot e o plugin DNS, regenera a configuração e valida os serviços.
 
 Os nós adicionais da palette não são actualizados automaticamente:
 
@@ -265,10 +275,11 @@ make upgrade-system
 - `/etc/systemd/system/nodered.service`;
 - `/etc/nginx/conf.d/nodered.conf`;
 - `/etc/nginx/tls/<FQDN>/`;
-- `/opt/acme.sh`;
-- `/etc/acme.sh/{staging,prod}`;
-- `/var/lib/acme.sh/{staging,prod}`;
-- `/var/backups/nodered` — backups protegidos, incluindo `.env` e dados ACME.
+- `/etc/letsencrypt` — conta, credenciais, certificados e renovação de produção;
+- `/var/lib/letsencrypt` e `/var/log/letsencrypt` — estado e logs de produção;
+- `/etc/letsencrypt-staging` — configuração/certificados isolados de staging;
+- `/usr/local/libexec/nodered-certbot-deploy-<FQDN>` — deploy e reload após renovação;
+- `/var/backups/nodered` — backups protegidos, incluindo `.env` e dados Certbot.
 
 ## Notas de segurança
 
@@ -277,4 +288,4 @@ make upgrade-system
 - Não abra a porta 1880 na firewall.
 - Não altere `NODE_RED_CREDENTIAL_SECRET` após guardar credenciais nos flows.
 - Teste primeiro com `make cert-le-stag`.
-- Um certificado staging ou auto-assinado não será confiável para browsers.
+- Um certificado auto-assinado não será confiável para browsers.
