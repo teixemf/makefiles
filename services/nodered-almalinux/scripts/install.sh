@@ -32,8 +32,18 @@ fi
 
 log "A activar serviços e firewall"
 systemctl enable --now firewalld
-firewall-cmd --permanent --add-service=http
-firewall-cmd --permanent --add-service=https
+for firewall_service in http https; do
+    if firewall-cmd --permanent --query-service="${firewall_service}" >/dev/null; then
+        continue
+    else
+        query_status=$?
+    fi
+    if (( query_status == 1 )); then
+        firewall-cmd --permanent --add-service="${firewall_service}"
+    else
+        die "não foi possível consultar o serviço ${firewall_service} na firewall."
+    fi
+done
 firewall-cmd --permanent --remove-port="${NODERED_PORT}/tcp" >/dev/null 2>&1 || true
 firewall-cmd --reload
 
