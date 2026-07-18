@@ -191,6 +191,20 @@ rm -f "${nginx_tmp}"
 
 systemctl daemon-reload
 restorecon -RF /etc/node-red "${NODERED_HOME}" /etc/nginx 2>/dev/null || true
-setsebool -P httpd_can_network_connect 1
+
+selinux_mode="$(getenforce 2>/dev/null || true)"
+case "${selinux_mode}" in
+    Disabled)
+        log "SELinux está desactivado; a configuração do booleano foi ignorada."
+        ;;
+    Enforcing|Permissive)
+        if ! setsebool -P httpd_can_network_connect 1; then
+            warn "não foi possível persistir httpd_can_network_connect; a instalação continua."
+        fi
+        ;;
+    *)
+        warn "não foi possível determinar o estado do SELinux; a configuração do booleano foi ignorada."
+        ;;
+esac
 
 ok "configuração actualizada."
