@@ -21,7 +21,7 @@ dnf upgrade -y certbot "$(certbot_plugin_package)"
 ensure_nodejs_runtime
 dnf upgrade -y nodejs npm
 
-log "A actualizar Node-RED e bcryptjs"
+log "A actualizar Node-RED"
 systemctl stop nodered 2>/dev/null || true
 trap 'systemctl start nodered >/dev/null 2>&1 || true' ERR
 install_global_node_red
