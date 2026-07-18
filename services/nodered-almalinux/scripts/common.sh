@@ -295,6 +295,26 @@ ensure_nodejs_runtime() {
         || die "Node.js 22 ou superior é necessário para o Node-RED 5.x; foi instalado ${node_version}."
 }
 
+install_global_node_red() {
+    (
+        umask 022
+        npm install -g "node-red@${NODERED_VERSION}" bcryptjs@latest
+    )
+
+    ensure_global_node_red_permissions
+}
+
+ensure_global_node_red_permissions() {
+    local npm_root node_red_dir
+
+    npm_root="$(npm root -g)"
+    node_red_dir="${npm_root}/node-red"
+    [[ -d "${node_red_dir}" ]] || die "o pacote global Node-RED não foi encontrado em ${node_red_dir}."
+
+    chmod 0755 "${npm_root}"
+    chmod -R u=rwX,go=rX "${node_red_dir}"
+}
+
 nginx_cert_dir() {
     printf '/etc/nginx/tls/%s' "${FQDN}"
 }
