@@ -1,0 +1,4 @@
+interface:
+  display_name: "Makefile Maintainer"
+  short_description: "Creates and reviews consistent, secure Makefiles"
+  default_prompt: "Use $makefile-maintainer to create or review a Makefile in this repository."

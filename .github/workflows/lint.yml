@@ -1,0 +1,23 @@
+name: lint
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  shell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit service structure
+        run: .codex/skills/makefile-maintainer/scripts/audit-repository.sh
+      - name: Lint services
+        run: |
+          set -Eeuo pipefail
+          for service_dir in services/*; do
+            [ -f "$service_dir/Makefile" ] || continue
+            make --no-print-directory -C "$service_dir" lint
+          done

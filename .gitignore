@@ -1,0 +1,14 @@
+# Configuração local e segredos
+.env
+.env.*
+!.env.example
+
+# Artefactos e logs
+*.log
+*.tar.gz
+*.zip
+
+# Editores e sistema operativo
+.DS_Store
+.idea/
+.vscode/
