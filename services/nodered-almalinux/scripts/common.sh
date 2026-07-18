@@ -23,10 +23,25 @@ load_env() {
         warn "${ENV_FILE} é legível por grupo/outros; execute chmod 600 '${ENV_FILE}'."
     fi
 
+    local env_source line env_status
+    env_source="$(mktemp)"
+    while IFS= read -r line || [[ -n "${line}" ]]; do
+        if [[ "${line}" =~ ^([[:space:]]*(NODERED_ADMIN_PASSWORD_HASH|NODERED_HTTP_NODE_PASSWORD_HASH)=)(\$2[aby]\$[0-9]{2}\$[./A-Za-z0-9]{53})([[:space:]]*)$ ]]; then
+            printf "%s'%s'%s\n" "${BASH_REMATCH[1]}" "${BASH_REMATCH[3]}" "${BASH_REMATCH[4]}" >> "${env_source}"
+        else
+            printf '%s\n' "${line}" >> "${env_source}"
+        fi
+    done < "${ENV_FILE}"
+
     set -a
+    set +e
     # shellcheck disable=SC1090
-    source "${ENV_FILE}"
+    source "${env_source}"
+    env_status=$?
+    set -e
     set +a
+    rm -f -- "${env_source}"
+    (( env_status == 0 )) || return "${env_status}"
 
     : "${FQDN:=}"
     : "${NODE_MAJOR:=24}"

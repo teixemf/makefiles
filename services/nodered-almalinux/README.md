@@ -162,6 +162,11 @@ caracteres especiais.
 | `NODERED_HTTP_NODE_PASSWORD` | Password em claro usada apenas para gerar o hash HTTP. |
 | `NODERED_HTTP_NODE_PASSWORD_HASH` | Hash bcrypt da password dos endpoints HTTP. |
 
+Os hashes bcrypt podem ser escritos com aspas simples, por exemplo
+`NODERED_ADMIN_PASSWORD_HASH='$2b$10$...'`. O carregador também aceita hashes
+bcrypt sem aspas e trata-os literalmente, evitando que o Bash interprete
+`$2`, `$10` e semelhantes como variáveis.
+
 A autenticação do editor e da Admin API não protege automaticamente os
 endpoints criados pelos nós `HTTP In`. Com a opção global desactivada:
 
