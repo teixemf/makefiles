@@ -140,7 +140,10 @@ caracteres especiais.
 | Variável | Descrição |
 | --- | --- |
 | `FQDN` | Nome DNS completo usado pelo Nginx e pelos certificados, por exemplo `nodered.example.com`. |
-| `NODE_MAJOR` | Versão principal do Node.js instalada pelo módulo AppStream do AlmaLinux, por exemplo `24`. |
+O instalador usa os pacotes `nodejs` e `npm` fornecidos pelo AlmaLinux. A
+versão major disponível no sistema é aceite desde que seja Node.js 22 ou
+superior, que é o mínimo para Node-RED 5.x. O Node-RED é instalado globalmente
+com `npm install -g`.
 | `NODERED_VERSION` | Versão do Node-RED. `latest` acompanha a versão mais recente; para instalações previsíveis, fixe uma versão. |
 | `NODERED_USER` | Conta de sistema que executa o Node-RED. Por defeito, `nodered`. |
 | `NODERED_GROUP` | Grupo da conta do serviço. Por defeito, `nodered`. |
@@ -257,8 +260,8 @@ Upgrade normal:
 make upgrade
 ```
 
-Este alvo cria um backup, actualiza os pacotes RPM, garante `NODE_MAJOR` pelo
-módulo AppStream do AlmaLinux, actualiza Node-RED para `NODERED_VERSION`, executa `npm rebuild`, actualiza o
+Este alvo cria um backup, actualiza os pacotes RPM, actualiza Node.js/npm pelos
+repositórios do AlmaLinux, actualiza Node-RED para `NODERED_VERSION`, executa `npm rebuild`, actualiza o
 Certbot e o plugin DNS, regenera a configuração e valida os serviços.
 
 Os nós adicionais da palette não são actualizados automaticamente:
