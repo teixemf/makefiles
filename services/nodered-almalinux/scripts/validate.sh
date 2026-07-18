@@ -7,6 +7,7 @@ require_root
 load_env
 
 failures=0
+node_red_ready=false
 check() {
     local description="$1"
     shift
@@ -28,13 +29,25 @@ else
 fi
 
 check "configuração Nginx válida" nginx -t
-check "serviço Node-RED activo" systemctl is-active --quiet nodered
 check "serviço Nginx activo" systemctl is-active --quiet nginx
 
-if ss -lntH "( sport = :${NODERED_PORT} )" 2>/dev/null | grep -q "${NODERED_BIND}:${NODERED_PORT}"; then
+for ((attempt = 1; attempt <= 30; attempt++)); do
+    if systemctl is-active --quiet nodered \
+        && ss -lntH "( sport = :${NODERED_PORT} )" 2>/dev/null \
+        | grep -q "${NODERED_BIND}:${NODERED_PORT}"; then
+        node_red_ready=true
+        break
+    fi
+    sleep 1
+done
+
+if [[ "${node_red_ready}" == true ]]; then
+    ok "serviço Node-RED activo"
     ok "Node-RED escuta em ${NODERED_BIND}:${NODERED_PORT}"
 else
-    warn "FALHOU: Node-RED não escuta no endereço esperado"
+    warn "FALHOU: Node-RED não ficou operacional em 30 segundos"
+    systemctl --no-pager --full status nodered || true
+    journalctl -u nodered.service -b -n 100 --no-pager || true
     failures=$((failures + 1))
 fi
 
@@ -45,20 +58,24 @@ else
     ok "porta ${NODERED_PORT} não exposta publicamente"
 fi
 
-auth_json="$(curl -fsS "http://${NODERED_BIND}:${NODERED_PORT}/auth/login" 2>/dev/null || true)"
-if grep -q '"type"[[:space:]]*:[[:space:]]*"credentials"' <<<"${auth_json}"; then
-    ok "adminAuth activo"
-else
-    warn "FALHOU: /auth/login não indica autenticação por credenciais"
-    failures=$((failures + 1))
-fi
+if [[ "${node_red_ready}" == true ]]; then
+    auth_json="$(curl -fsS "http://${NODERED_BIND}:${NODERED_PORT}/auth/login" 2>/dev/null || true)"
+    if grep -q '"type"[[:space:]]*:[[:space:]]*"credentials"' <<<"${auth_json}"; then
+        ok "adminAuth activo"
+    else
+        warn "FALHOU: /auth/login não indica autenticação por credenciais"
+        failures=$((failures + 1))
+    fi
 
-if curl -kfsS --resolve "${FQDN}:443:127.0.0.1" "https://${FQDN}/auth/login" \
-    | grep -q '"credentials"'; then
-    ok "HTTPS/reverse proxy funcional"
+    if curl -kfsS --resolve "${FQDN}:443:127.0.0.1" "https://${FQDN}/auth/login" \
+        | grep -q '"credentials"'; then
+        ok "HTTPS/reverse proxy funcional"
+    else
+        warn "FALHOU: teste HTTPS local"
+        failures=$((failures + 1))
+    fi
 else
-    warn "FALHOU: teste HTTPS local"
-    failures=$((failures + 1))
+    warn "IGNORADO: autenticação e HTTPS porque Node-RED não está disponível"
 fi
 
 cert="$(nginx_cert_dir)/fullchain.pem"
