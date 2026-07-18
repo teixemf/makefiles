@@ -24,8 +24,9 @@ dnf upgrade -y nodejs npm
 log "A actualizar Node-RED e bcryptjs"
 systemctl stop nodered 2>/dev/null || true
 trap 'systemctl start nodered >/dev/null 2>&1 || true' ERR
-npm install -g "node-red@${NODERED_VERSION}" bcryptjs@latest
+install_global_node_red
 npm rebuild -g node-red || warn "npm rebuild global devolveu erro."
+ensure_global_node_red_permissions
 
 if [[ -f "${NODERED_HOME}/package.json" ]]; then
     runuser -u "${NODERED_USER}" -- \

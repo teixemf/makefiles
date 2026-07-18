@@ -100,6 +100,8 @@ node_red_entrypoint="${npm_global_root}/node-red/red.js"
 [[ -x "${node_bin}" ]] || die "the Node.js executable is not executable: ${node_bin}"
 [[ -r "${node_red_entrypoint}" ]] \
     || die "the Node-RED entrypoint is missing: ${node_red_entrypoint}"
+runuser -u "${NODERED_USER}" -- test -r "${node_red_entrypoint}" \
+    || die "the Node-RED entrypoint is not readable by ${NODERED_USER}: ${node_red_entrypoint}"
 log "A gerar unidade systemd"
 service_tmp="$(mktemp)"
 cat > "${service_tmp}" <<EOF
