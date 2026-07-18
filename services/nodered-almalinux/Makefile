@@ -15,41 +15,41 @@ define run_as_root
 	elif command -v sudo >/dev/null 2>&1; then \
 		sudo ENV_FILE="$(ENV_ABS)" "$(SCRIPTS)/$(1)"; \
 	else \
-		echo "ERRO: execute como root ou instale/configure sudo." >&2; \
+		echo "ERROR: run as root or install/configure sudo." >&2; \
 		exit 1; \
 	fi
 endef
 
 help:
 	@printf '%s\n' \
-	  'Node-RED para AlmaLinux — alvos disponíveis:' \
+	  'Node-RED for AlmaLinux — available targets:' \
 	  '' \
-	  '  make help               mostra esta ajuda' \
-	  '  make init               cria .env a partir de .env.example' \
-	  '  make lint               valida a sintaxe dos scripts' \
-	  '  make install            instalação completa; TLS auto-assinado por defeito' \
-	  '  make configure          volta a gerar settings.js, systemd e Nginx' \
-	  '  make bcrypt             pede uma password e devolve o hash bcrypt' \
-	  '  make cert-selfsigned    instala/substitui por certificado auto-assinado' \
-	  '  make cert-le-stag       testa emissão Let'\''s Encrypt DNS-01 staging' \
-	  '  make cert-le-prod       emite/instala Let'\''s Encrypt DNS-01 produção' \
+	  '  make help               show this help' \
+	  '  make init               create .env from .env.example' \
+	  '  make lint               validate script syntax' \
+	  '  make install            complete installation; self-signed TLS by default' \
+	  '  make configure          regenerate settings.js, systemd, and Nginx' \
+	  '  make bcrypt             prompt for a password and print its bcrypt hash' \
+	  '  make cert-selfsigned    install/replace the self-signed certificate' \
+	  '  make cert-le-stag       test Let'\''s Encrypt DNS-01 staging issuance' \
+	  '  make cert-le-prod       issue/install a production Let'\''s Encrypt certificate' \
 	  '  make upgrade            backup + upgrade Node.js/Node-RED/Nginx/Certbot' \
-	  '  make upgrade-nodes      actualiza nós adicionais em NODERED_HOME' \
+	  '  make upgrade-nodes      upgrade additional nodes in NODERED_HOME' \
 	  '  make upgrade-system     dnf upgrade completo + make upgrade' \
-	  '  make backup             cria backup local protegido' \
-	  '  make validate           valida serviço, autenticação, TLS e firewall' \
-	  '  make status             estado resumido' \
-	  '  make restart            reinicia Node-RED e Nginx' \
-	  '  make logs               segue apenas os logs do Node-RED' \
-	  '  make logs-nginx         segue apenas os logs do Nginx' \
-	  '  make logs-all           segue os logs do Node-RED e Nginx' \
-	  '  make versions           mostra versões instaladas' \
+	  '  make backup             create a protected local backup' \
+	  '  make validate           validate service, authentication, TLS, and firewall' \
+	  '  make status             show a summary of the service status' \
+	  '  make restart            restart Node-RED and Nginx' \
+	  '  make logs               follow Node-RED logs only' \
+	  '  make logs-nginx         follow Nginx logs only' \
+	  '  make logs-all           follow Node-RED and Nginx logs' \
+	  '  make versions           show installed versions' \
 	  '' \
-	  'Pode usar outro ficheiro: make ENV_FILE=/caminho/instancia.env install'
+	  'Use another file with: make ENV_FILE=/path/instance.env install'
 
 init:
 	@if [ -e "$(ENV_ABS)" ]; then \
-		echo "ERRO: $(ENV_ABS) já existe." >&2; exit 1; \
+		echo "ERROR: $(ENV_ABS) already exists." >&2; exit 1; \
 	fi
 	@cp .env.example "$(ENV_ABS)"
 	@chmod 600 "$(ENV_ABS)"
@@ -57,15 +57,15 @@ init:
 	if [ -n "$$secret" ]; then \
 		sed -i "s|^NODE_RED_CREDENTIAL_SECRET=$$|NODE_RED_CREDENTIAL_SECRET=$$secret|" "$(ENV_ABS)"; \
 	fi
-	@echo "Criado $(ENV_ABS). Edite FQDN, autenticação e, se necessário, credenciais DNS."
+	@echo "Created $(ENV_ABS). Edit FQDN, authentication, and DNS credentials if needed."
 
 lint:
 	@for script in "$(SCRIPTS)"/*.sh; do bash -n "$$script"; done
-	@echo "Sintaxe Bash válida."
+	@echo "Valid Bash syntax."
 
 check-env:
 	@test -r "$(ENV_ABS)" || { \
-		echo "ERRO: falta $(ENV_ABS). Execute 'make init'." >&2; exit 1; \
+		echo "ERROR: $(ENV_ABS) is missing. Run 'make init'." >&2; exit 1; \
 	}
 
 install: check-env

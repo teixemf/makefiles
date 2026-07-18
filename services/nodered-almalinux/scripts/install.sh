@@ -8,7 +8,7 @@ require_root
 load_env
 check_os
 
-log "A instalar pacotes de base"
+log "Installing base packages"
 dnf install -y \
     ca-certificates curl openssl nginx firewalld \
     policycoreutils-python-utils httpd-tools tar gzip findutils
@@ -17,7 +17,7 @@ ensure_certbot_packages
 
 ensure_nodejs_runtime
 
-log "A instalar Node-RED ${NODERED_VERSION} e bcryptjs"
+log "Installing Node-RED ${NODERED_VERSION} and bcryptjs"
 npm install -g "node-red@${NODERED_VERSION}" bcryptjs@latest
 
 ensure_service_account
@@ -27,10 +27,10 @@ cert_dir="$(nginx_cert_dir)"
 if [[ ! -s "${cert_dir}/privkey.pem" || ! -s "${cert_dir}/fullchain.pem" ]]; then
     "${SCRIPT_DIR}/cert-selfsigned.sh"
 else
-    warn "certificado já existente; não foi substituído ($(cert_kind))."
+    warn "certificate already exists; it was not replaced ($(cert_kind))."
 fi
 
-log "A activar serviços e firewall"
+log "Enabling services and firewall"
 systemctl enable --now firewalld
 firewall-cmd --permanent --add-service=http
 firewall-cmd --permanent --add-service=https
@@ -49,6 +49,6 @@ if ! "${SCRIPT_DIR}/validate.sh"; then
 fi
 "${SCRIPT_DIR}/status.sh"
 if (( validation_status != 0 )); then
-    die "a instalação terminou com falhas na validação."
+    die "installation finished with validation failures."
 fi
-ok "instalação concluída: https://${FQDN}/"
+ok "installation complete: https://${FQDN}/"

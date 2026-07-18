@@ -11,5 +11,5 @@ printf 'npm:         '; npm --version 2>/dev/null || true
 printf 'Node-RED:    '; node-red --version 2>/dev/null || true
 printf 'Nginx:       '; nginx -v 2>&1 || true
 printf 'OpenSSL:     '; openssl version 2>/dev/null || true
-printf 'Certbot:     '; certbot --version 2>/dev/null || printf 'não instalado\n'
+printf 'Certbot:     '; certbot --version 2>/dev/null || printf 'not installed\n'
 printf 'Certificado: %s\n' "$(cert_kind)"

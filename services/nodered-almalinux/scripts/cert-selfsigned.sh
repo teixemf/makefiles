@@ -6,11 +6,11 @@ source "${SCRIPT_DIR}/common.sh"
 require_root
 load_env
 
-command -v openssl >/dev/null || die "openssl não está instalado."
+command -v openssl >/dev/null || die "openssl is not installed."
 cert_dir="$(nginx_cert_dir)"
 install -d -o root -g root -m 0700 "${cert_dir}"
 
-log "A gerar certificado TLS auto-assinado para ${FQDN}"
+log "Generating a self-signed TLS certificate for ${FQDN}"
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "${tmp_dir}"' EXIT
 
@@ -32,4 +32,4 @@ if systemctl is-active --quiet nginx; then
     systemctl reload nginx
 fi
 
-ok "certificado auto-assinado instalado."
+ok "self-signed certificate installed."

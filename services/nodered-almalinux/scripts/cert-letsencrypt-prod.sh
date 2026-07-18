@@ -9,4 +9,4 @@ load_env
 check_os
 issue_dns_cert prod
 enable_certbot_timer
-ok "certificado Let's Encrypt de PRODUÇÃO instalado e renovação automática activada."
+ok "Production Let's Encrypt certificate installed and automatic renewal enabled."

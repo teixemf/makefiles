@@ -13,43 +13,43 @@ check() {
     if "$@" >/dev/null 2>&1; then
         ok "${description}"
     else
-        warn "FALHOU: ${description}"
+        warn "FAILED: ${description}"
         failures=$((failures + 1))
     fi
 }
 
-check "conta de serviço existe" id "${NODERED_USER}"
+check "service account exists" id "${NODERED_USER}"
 shell="$(getent passwd "${NODERED_USER}" | cut -d: -f7 || true)"
 if [[ "${shell}" == "/sbin/nologin" || "${shell}" == "/usr/sbin/nologin" ]]; then
-    ok "conta de serviço sem login"
+    ok "service account has no login shell"
 else
-    warn "FALHOU: shell da conta é '${shell}'"
+    warn "FAILED: account shell is '${shell}'"
     failures=$((failures + 1))
 fi
 
-check "configuração Nginx válida" nginx -t
-check "serviço Node-RED activo" systemctl is-active --quiet nodered
-check "serviço Nginx activo" systemctl is-active --quiet nginx
+check "valid Nginx configuration" nginx -t
+check "Node-RED service is active" systemctl is-active --quiet nodered
+check "Nginx service is active" systemctl is-active --quiet nginx
 
 if ss -lntH "( sport = :${NODERED_PORT} )" 2>/dev/null | grep -q "${NODERED_BIND}:${NODERED_PORT}"; then
     ok "Node-RED escuta em ${NODERED_BIND}:${NODERED_PORT}"
 else
-    warn "FALHOU: Node-RED não escuta no endereço esperado"
+    warn "FAILED: Node-RED is not listening on the expected address"
     failures=$((failures + 1))
 fi
 
 if ss -lntH "( sport = :${NODERED_PORT} )" 2>/dev/null | grep -Eq '0\.0\.0\.0|\[::\]'; then
-    warn "FALHOU: porta ${NODERED_PORT} exposta em todas as interfaces"
+    warn "FAILED: port ${NODERED_PORT} is exposed on all interfaces"
     failures=$((failures + 1))
 else
-    ok "porta ${NODERED_PORT} não exposta publicamente"
+    ok "port ${NODERED_PORT} is not publicly exposed"
 fi
 
 auth_json="$(curl -fsS "http://${NODERED_BIND}:${NODERED_PORT}/auth/login" 2>/dev/null || true)"
 if grep -q '"type"[[:space:]]*:[[:space:]]*"credentials"' <<<"${auth_json}"; then
     ok "adminAuth activo"
 else
-    warn "FALHOU: /auth/login não indica autenticação por credenciais"
+    warn "FAILED: /auth/login does not indicate credential authentication"
     failures=$((failures + 1))
 fi
 
@@ -57,7 +57,7 @@ if curl -kfsS --resolve "${FQDN}:443:127.0.0.1" "https://${FQDN}/auth/login" \
     | grep -q '"credentials"'; then
     ok "HTTPS/reverse proxy funcional"
 else
-    warn "FALHOU: teste HTTPS local"
+    warn "FAILED: local HTTPS test"
     failures=$((failures + 1))
 fi
 
@@ -67,25 +67,25 @@ if [[ -r "${cert}" ]]; then
     ok "certificado presente (${certificate_kind})"
     openssl x509 -in "${cert}" -noout -subject -issuer -dates
     if [[ "${certificate_kind}" == "letsencrypt-prod" ]]; then
-        check "timer de renovação Certbot activo" systemctl is-active --quiet certbot-renew.timer
-        check "configuração de renovação Certbot presente" \
+        check "Certbot renewal timer is active" systemctl is-active --quiet certbot-renew.timer
+        check "Certbot renewal configuration exists" \
             test -r "${CERTBOT_CONFIG_DIR}/renewal/${FQDN}.conf"
     fi
 else
-    warn "FALHOU: certificado ausente"
+    warn "FAILED: certificate is missing"
     failures=$((failures + 1))
 fi
 
 if systemctl is-active --quiet firewalld; then
     services="$(firewall-cmd --list-services 2>/dev/null || true)"
     grep -qw http <<<"${services}" && grep -qw https <<<"${services}" \
-        && ok "firewall permite HTTP/HTTPS" \
-        || { warn "FALHOU: HTTP/HTTPS não estão ambos permitidos na firewall"; failures=$((failures + 1)); }
+        && ok "firewall allows HTTP/HTTPS" \
+        || { warn "FAILED: HTTP/HTTPS are not both allowed by the firewall"; failures=$((failures + 1)); }
 else
-    warn "firewalld não está activo"
+    warn "firewalld is not active"
 fi
 
 if (( failures > 0 )); then
-    die "${failures} validação(ões) falharam."
+    die "${failures} validation(s) failed."
 fi
-ok "todas as validações passaram."
+ok "all validations passed."

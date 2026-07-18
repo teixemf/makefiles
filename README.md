@@ -1,21 +1,20 @@
 # Makefiles
 
-Coleção de Makefiles e ficheiros auxiliares para instalar, configurar e operar
-serviços e aplicações nas minhas máquinas.
+A collection of Makefiles and supporting files for installing, configuring, and
+operating services and applications on my machines.
 
-> Os scripts podem alterar a configuração do sistema e vários alvos requerem
-> privilégios de `root`. Leia sempre o código e reveja o ficheiro `.env` antes
-> de executar uma instalação.
+> These scripts can modify system configuration and several targets require
+> `root` privileges. Always read the code and review `.env` before installing.
 
-## Serviços disponíveis
+## Available services
 
-| Serviço | Plataforma | Descrição |
+| Service | Platform | Description |
 | --- | --- | --- |
-| [Node-RED](services/nodered-almalinux/) | AlmaLinux 9 | Node-RED, Nginx, TLS, systemd, firewall, backups e upgrades |
+| [Node-RED](services/nodered-almalinux/) | AlmaLinux 9 | Node-RED, Nginx, TLS, systemd, firewall, backups, and upgrades |
 
-## Utilização
+## Usage
 
-Cada serviço é utilizado exclusivamente a partir do seu próprio diretório:
+Each service is used exclusively from its own directory:
 
 ```bash
 cd services/nodered-almalinux
@@ -28,38 +27,40 @@ make install
 ## Estrutura
 
 ```text
-services/<serviço>/
+services/<service>/
 ├── Makefile
 ├── .env.example
 ├── README.md
 └── scripts/
 ```
 
-Cada serviço é autónomo, documentado e inclui um alvo `lint`. Não existe um
-Makefile agregador na raiz do repositório. Segredos e configuração específica
-de cada máquina ficam em `.env`, que não deve ser adicionado ao Git.
+Each service is self-contained, documented, and includes a `lint` target. There
+is no aggregate Makefile at the repository root. Machine-specific secrets and
+configuration belong in `.env`, which must not be committed to Git.
 
-As convenções obrigatórias para agentes e contribuições estão definidas em
+Mandatory agent and contribution conventions are defined in
 [`AGENTS.md`](AGENTS.md).
 
-## Assistência Codex
+## Codex assistance
 
 O skill local [`makefile-maintainer`](.codex/skills/makefile-maintainer/SKILL.md)
-cria e revê GNU Makefiles segundo estas convenções. Pode ser invocado com:
+skill creates and reviews GNU Makefiles according to these conventions. It can
+be invoked with:
 
 ```text
 $makefile-maintainer
 ```
 
 O script `.codex/skills/makefile-maintainer/scripts/audit-repository.sh` aplica
-verificações determinísticas de estrutura, interface, documentação de alvos e
-sintaxe dos scripts.
+performs deterministic checks for structure, interfaces, documented targets,
+and script syntax.
 
-## Origem
+## Origin
 
-O primeiro instalador deste repositório foi desenvolvido a partir da conversa
-[Instalação Node-RED AlmaLinux](https://chatgpt.com/share/6a5ba9e3-9ee8-83ed-a64f-7ee6b087207e).
+The first installer in this repository was developed from the
+[Node-RED AlmaLinux installation](https://chatgpt.com/share/6a5ba9e3-9ee8-83ed-a64f-7ee6b087207e)
+conversation.
 
-## Licença
+## License
 
-Distribuído sob a [licença MIT](LICENSE).
+Distributed under the [MIT license](LICENSE).

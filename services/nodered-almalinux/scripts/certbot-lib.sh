@@ -6,7 +6,7 @@ certbot_plugin_package() {
 }
 
 ensure_certbot_packages() {
-    log "A instalar Certbot e plugin DNS ${CERTBOT_DNS_PROVIDER}"
+    log "Installing Certbot and the ${CERTBOT_DNS_PROVIDER} DNS plugin"
     dnf install -y epel-release
     dnf install -y certbot "$(certbot_plugin_package)"
 }
@@ -14,7 +14,7 @@ ensure_certbot_packages() {
 validate_credentials_permissions() {
     local credentials_file="$1" mode
     [[ -r "${credentials_file}" ]] \
-        || die "não é possível ler ${credentials_file}."
+        || die "cannot read ${credentials_file}."
     mode="$(stat -c '%a' "${credentials_file}")"
     (( (8#${mode} & 077) == 0 )) \
         || die "${credentials_file} deve ter modo 0600."
@@ -27,7 +27,7 @@ prepare_dns_credentials() {
     if [[ "${CERTBOT_DNS_PROVIDER}" == "cloudflare" ]]; then
         if [[ -n "${CLOUDFLARE_API_TOKEN}" ]]; then
             [[ "${CLOUDFLARE_API_TOKEN}" =~ ^[^[:space:]]+$ ]] \
-                || die "CLOUDFLARE_API_TOKEN não pode conter espaços ou quebras de linha."
+                || die "CLOUDFLARE_API_TOKEN cannot contain spaces or newlines."
             install -d -o root -g root -m 0700 "${credentials_dir}"
             credentials_tmp="$(mktemp "${credentials_dir}/.dns-cloudflare.XXXXXX")"
             printf 'dns_cloudflare_api_token = %s\n' "${CLOUDFLARE_API_TOKEN}" \
@@ -63,7 +63,7 @@ install_deploy_hook() {
     cat > "${hook_tmp}" <<EOF
 #!/usr/bin/env bash
 set -Eeuo pipefail
-lineage="\${RENEWED_LINEAGE:?RENEWED_LINEAGE não foi definido pelo Certbot}"
+lineage="\${RENEWED_LINEAGE:?RENEWED_LINEAGE was not set by Certbot}"
 [[ -r "\${lineage}/privkey.pem" && -r "\${lineage}/fullchain.pem" ]]
 install -d -o root -g root -m 0700 "${cert_dir}"
 key_tmp="\$(mktemp "${cert_dir}/.privkey.XXXXXX")"
@@ -85,7 +85,7 @@ EOF
 deploy_cert_lineage() {
     local lineage="$1" cert_dir
     [[ -r "${lineage}/privkey.pem" && -r "${lineage}/fullchain.pem" ]] \
-        || die "o Certbot não criou uma lineage utilizável em ${lineage}."
+        || die "Certbot did not create a usable lineage at ${lineage}."
     cert_dir="$(nginx_cert_dir)"
     install -d -o root -g root -m 0700 "${cert_dir}"
     install_atomic "${lineage}/privkey.pem" "${cert_dir}/privkey.pem" 0600 root root
@@ -138,10 +138,10 @@ issue_dns_cert() {
     )
 
     if [[ "${environment}" == "staging" ]]; then
-        log "A testar emissão Certbot DNS-01 staging (${CERTBOT_DNS_PROVIDER})"
+        log "Testing Certbot DNS-01 staging issuance (${CERTBOT_DNS_PROVIDER})"
         certbot "${certbot_args[@]}" --staging --force-renewal
     else
-        log "A emitir certificado Certbot DNS-01 de produção (${CERTBOT_DNS_PROVIDER})"
+        log "Issuing a production Certbot DNS-01 certificate (${CERTBOT_DNS_PROVIDER})"
         certbot "${certbot_args[@]}" \
             --keep-until-expiring \
             --deploy-hook "${CERTBOT_DEPLOY_HOOK}"

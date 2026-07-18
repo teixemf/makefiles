@@ -7,4 +7,4 @@ load_env
 nginx -t
 systemctl restart nodered
 systemctl reload nginx
-ok "serviços reiniciados."
+ok "services restarted."

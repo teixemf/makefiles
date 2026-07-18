@@ -7,6 +7,6 @@ require_root
 load_env
 check_os
 "${SCRIPT_DIR}/backup.sh"
-log "A executar upgrade completo do AlmaLinux"
+log "Running a complete AlmaLinux upgrade"
 dnf upgrade -y
 "${SCRIPT_DIR}/upgrade.sh"

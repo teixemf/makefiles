@@ -29,7 +29,7 @@ do
 done
 
 if (( ${#paths[@]} == 0 )); then
-    warn "não existem ainda ficheiros para incluir no backup."
+    warn "there are no files to include in the backup yet."
     exit 0
 fi
 
@@ -39,4 +39,4 @@ chmod 0600 "${archive}"
 find "${BACKUP_ROOT}" -maxdepth 1 -type f -name 'nodered-*.tar.gz' \
     -mtime "+${BACKUP_RETENTION_DAYS}" -delete
 
-ok "backup criado: ${archive}"
+ok "backup created: ${archive}"

@@ -12,15 +12,15 @@ warn() { printf '\033[1;33mAVISO:\033[0m %s\n' "$*" >&2; }
 die()  { printf '\033[1;31mERRO:\033[0m %s\n' "$*" >&2; exit 1; }
 
 require_root() {
-    [[ ${EUID} -eq 0 ]] || die "este alvo tem de ser executado como root."
+    [[ ${EUID} -eq 0 ]] || die "this target must be run as root."
 }
 
 load_env() {
-    [[ -r "${ENV_FILE}" ]] || die "não é possível ler ${ENV_FILE}."
+    [[ -r "${ENV_FILE}" ]] || die "cannot read ${ENV_FILE}."
     local mode
     mode="$(stat -c '%a' "${ENV_FILE}" 2>/dev/null || true)"
     if [[ -n "${mode}" && $((8#${mode} & 077)) -ne 0 ]]; then
-        warn "${ENV_FILE} é legível por grupo/outros; execute chmod 600 '${ENV_FILE}'."
+        warn "${ENV_FILE} is readable by group/others; run chmod 600 '${ENV_FILE}'."
     fi
 
     local env_source line env_status
@@ -44,7 +44,6 @@ load_env() {
     (( env_status == 0 )) || return "${env_status}"
 
     : "${FQDN:=}"
-    : "${NODE_MAJOR:=24}"
     : "${NODERED_VERSION:=latest}"
     : "${NODERED_USER:=nodered}"
     : "${NODERED_GROUP:=nodered}"
@@ -82,7 +81,7 @@ load_env() {
     : "${BACKUP_RETENTION_DAYS:=30}"
     : "${ALLOW_RHEL_COMPAT:=false}"
 
-    export FQDN NODE_MAJOR NODERED_VERSION NODERED_USER NODERED_GROUP
+    export FQDN NODERED_VERSION NODERED_USER NODERED_GROUP
     export NODERED_HOME NODERED_BIND NODERED_PORT NODERED_SESSION_SECONDS
     export NODERED_ADMIN_USER NODERED_ADMIN_PASSWORD NODERED_ADMIN_PASSWORD_HASH
     export NODE_RED_CREDENTIAL_SECRET NODERED_HTTP_NODE_AUTH
@@ -102,32 +101,31 @@ load_env() {
 
 validate_env() {
     [[ "${FQDN}" =~ ^([A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}$ ]] \
-        || die "FQDN inválido: '${FQDN}'."
-    [[ "${NODE_MAJOR}" =~ ^[0-9]{2}$ ]] || die "NODE_MAJOR tem de ser numérico, por exemplo 24."
+        || die "invalid FQDN: '${FQDN}'."
     [[ "${NODERED_VERSION}" =~ ^(latest|[0-9]+([.][0-9x*]+){0,2}(-[0-9A-Za-z.-]+)?)$ ]] \
-        || die "NODERED_VERSION deve ser latest, 5, 5.x ou uma versão semver."
-    [[ "${NODERED_USER}" =~ ^[a-z_][a-z0-9_-]*$ ]] || die "NODERED_USER inválido."
-    [[ "${NODERED_GROUP}" =~ ^[a-z_][a-z0-9_-]*$ ]] || die "NODERED_GROUP inválido."
-    [[ "${NODERED_ADMIN_USER}" =~ ^[A-Za-z0-9_.@-]+$ ]] || die "NODERED_ADMIN_USER inválido."
+        || die "NODERED_VERSION must be latest, 5, 5.x, or a semver version."
+    [[ "${NODERED_USER}" =~ ^[a-z_][a-z0-9_-]*$ ]] || die "invalid NODERED_USER."
+    [[ "${NODERED_GROUP}" =~ ^[a-z_][a-z0-9_-]*$ ]] || die "invalid NODERED_GROUP."
+    [[ "${NODERED_ADMIN_USER}" =~ ^[A-Za-z0-9_.@-]+$ ]] || die "invalid NODERED_ADMIN_USER."
     [[ "${NODERED_PORT}" =~ ^[0-9]+$ ]] && (( NODERED_PORT >= 1 && NODERED_PORT <= 65535 )) \
-        || die "NODERED_PORT inválido."
-    [[ "${NODERED_SESSION_SECONDS}" =~ ^[0-9]+$ ]] || die "NODERED_SESSION_SECONDS inválido."
-    [[ "${SELF_SIGNED_DAYS}" =~ ^[0-9]+$ ]] || die "SELF_SIGNED_DAYS inválido."
+        || die "invalid NODERED_PORT."
+    [[ "${NODERED_SESSION_SECONDS}" =~ ^[0-9]+$ ]] || die "invalid NODERED_SESSION_SECONDS."
+    [[ "${SELF_SIGNED_DAYS}" =~ ^[0-9]+$ ]] || die "invalid SELF_SIGNED_DAYS."
     [[ "${CERTBOT_DNS_PROVIDER}" =~ ^[a-z0-9][a-z0-9-]*$ ]] \
-        || die "CERTBOT_DNS_PROVIDER inválido."
+        || die "invalid CERTBOT_DNS_PROVIDER."
     [[ "${CERTBOT_DNS_PROPAGATION_SECONDS}" =~ ^[0-9]+$ ]] \
-        || die "CERTBOT_DNS_PROPAGATION_SECONDS inválido."
+        || die "invalid CERTBOT_DNS_PROPAGATION_SECONDS."
     [[ "${CERTBOT_KEY_TYPE}" =~ ^(ecdsa|rsa)$ ]] \
         || die "CERTBOT_KEY_TYPE deve ser ecdsa ou rsa."
     [[ "${CERTBOT_ELLIPTIC_CURVE}" =~ ^(secp256r1|secp384r1)$ ]] \
-        || die "CERTBOT_ELLIPTIC_CURVE inválido."
+        || die "invalid CERTBOT_ELLIPTIC_CURVE."
     [[ "${CERTBOT_RSA_KEY_SIZE}" =~ ^(2048|3072|4096)$ ]] \
-        || die "CERTBOT_RSA_KEY_SIZE inválido."
-    [[ "${BACKUP_RETENTION_DAYS}" =~ ^[0-9]+$ ]] || die "BACKUP_RETENTION_DAYS inválido."
+        || die "invalid CERTBOT_RSA_KEY_SIZE."
+    [[ "${BACKUP_RETENTION_DAYS}" =~ ^[0-9]+$ ]] || die "invalid BACKUP_RETENTION_DAYS."
     [[ "${NODERED_BIND}" == "127.0.0.1" ]] \
-        || die "por segurança, NODERED_BIND deve ser 127.0.0.1."
-    [[ "${NODERED_HTTP_NODE_USER}" =~ ^[A-Za-z0-9_.@-]+$ ]] || die "NODERED_HTTP_NODE_USER inválido."
-    [[ "${NODERED_HOME}" =~ ^/[A-Za-z0-9._/-]+$ ]] || die "NODERED_HOME tem de ser absoluto e sem espaços."
+        || die "for security, NODERED_BIND must be 127.0.0.1."
+    [[ "${NODERED_HTTP_NODE_USER}" =~ ^[A-Za-z0-9_.@-]+$ ]] || die "invalid NODERED_HTTP_NODE_USER."
+    [[ "${NODERED_HOME}" =~ ^/[A-Za-z0-9._/-]+$ ]] || die "NODERED_HOME must be absolute and contain no spaces."
     local certbot_path
     for certbot_path in \
         "${CERTBOT_CONFIG_DIR}" "${CERTBOT_WORK_DIR}" "${CERTBOT_LOGS_DIR}" \
@@ -136,16 +134,20 @@ validate_env() {
         "${CERTBOT_DEPLOY_HOOK}"
     do
         [[ "${certbot_path}" =~ ^/[A-Za-z0-9._/-]+$ ]] \
-            || die "os caminhos Certbot têm de ser absolutos e sem espaços."
+            || die "Certbot paths must be absolute and contain no spaces."
     done
     [[ "${NODERED_HTTP_NODE_AUTH}" =~ ^(true|false)$ ]] || die "NODERED_HTTP_NODE_AUTH deve ser true ou false."
     [[ "${ALLOW_RHEL_COMPAT}" =~ ^(true|false)$ ]] || die "ALLOW_RHEL_COMPAT deve ser true ou false."
 }
 
 check_os() {
-    [[ -r /etc/os-release ]] || die "não foi encontrado /etc/os-release."
+    [[ -r /etc/os-release ]] || die "/etc/os-release was not found."
     # shellcheck disable=SC1091
     source /etc/os-release
+    local os_major="${VERSION_ID:-}"
+    os_major="${os_major%%.*}"
+    [[ "${os_major}" =~ ^[0-9]+$ ]] && (( os_major >= 10 )) \
+        || die "this project requires AlmaLinux 10 or newer. Detected ${PRETTY_NAME:-${ID:-unknown}}."
     if [[ "${ID:-}" == "almalinux" ]]; then
         return
     fi
@@ -153,7 +155,7 @@ check_os() {
         warn "sistema ${ID:-desconhecido} aceite por ALLOW_RHEL_COMPAT=true."
         return
     fi
-    die "este projecto destina-se a AlmaLinux. Detectado ID='${ID:-desconhecido}'."
+    die "this project targets AlmaLinux. Detected ID='${ID:-unknown}'."
 }
 
 backup_file() {
@@ -185,7 +187,7 @@ system_env_value() {
 
 generate_bcrypt() {
     local plaintext="$1"
-    [[ -n "${plaintext}" ]] || die "não é possível gerar bcrypt de uma palavra-passe vazia."
+    [[ -n "${plaintext}" ]] || die "cannot generate bcrypt from an empty password."
     local npm_root
     npm_root="$(npm root -g)"
     NODE_PATH="${npm_root}" node -e '
@@ -213,7 +215,7 @@ resolve_auth_material() {
         die "defina NODERED_ADMIN_PASSWORD ou NODERED_ADMIN_PASSWORD_HASH no .env."
     fi
     [[ "${ADMIN_HASH}" =~ ^\$2[aby]\$[0-9]{2}\$[./A-Za-z0-9]{53}$ ]] \
-        || die "o hash do administrador não é um bcrypt válido de 60 caracteres."
+        || die "the administrator hash is not a valid 60-character bcrypt hash."
 
     if [[ -n "${NODE_RED_CREDENTIAL_SECRET}" ]]; then
         CREDENTIAL_SECRET="${NODE_RED_CREDENTIAL_SECRET}"
@@ -221,7 +223,7 @@ resolve_auth_material() {
         CREDENTIAL_SECRET="${existing_secret}"
     else
         CREDENTIAL_SECRET="$(openssl rand -hex 32)"
-        warn "NODE_RED_CREDENTIAL_SECRET não estava definido; foi gerado um segredo novo."
+        warn "NODE_RED_CREDENTIAL_SECRET was not set; a new secret was generated."
     fi
     [[ "${CREDENTIAL_SECRET}" =~ ^[A-Za-z0-9._~!@%+=:-]{16,}$ ]] \
         || die "NODE_RED_CREDENTIAL_SECRET deve ter pelo menos 16 caracteres seguros."
@@ -235,10 +237,10 @@ resolve_auth_material() {
         elif [[ -n "${existing_http}" ]]; then
             HTTP_HASH="${existing_http}"
         else
-            die "NODERED_HTTP_NODE_AUTH=true requer password ou hash HTTP."
+            die "NODERED_HTTP_NODE_AUTH=true requires an HTTP password or hash."
         fi
         [[ "${HTTP_HASH}" =~ ^\$2[aby]\$[0-9]{2}\$[./A-Za-z0-9]{53}$ ]] \
-            || die "o hash HTTP não é um bcrypt válido de 60 caracteres."
+            || die "the HTTP hash is not a valid 60-character bcrypt hash."
     fi
 
     export ADMIN_HASH CREDENTIAL_SECRET HTTP_HASH
@@ -254,9 +256,9 @@ ensure_service_account() {
         current_home="$(getent passwd "${NODERED_USER}" | cut -d: -f6)"
         current_shell="$(getent passwd "${NODERED_USER}" | cut -d: -f7)"
         [[ "${current_home}" == "${NODERED_HOME}" ]] \
-            || die "o utilizador existente ${NODERED_USER} tem home ${current_home}, esperado ${NODERED_HOME}."
+            || die "existing user ${NODERED_USER} has home ${current_home}; expected ${NODERED_HOME}."
         [[ "${current_shell}" == "/sbin/nologin" || "${current_shell}" == "/usr/sbin/nologin" ]] \
-            || die "o utilizador existente ${NODERED_USER} não é uma conta nologin."
+            || die "existing user ${NODERED_USER} is not a nologin account."
     else
         useradd --system \
             --gid "${NODERED_GROUP}" \
@@ -274,7 +276,7 @@ ensure_service_account() {
 ensure_nodejs_runtime() {
     local installed_major node_version repo_file
 
-    log "A instalar Node.js ${NODE_MAJOR}.x e npm através do AlmaLinux AppStream"
+    log "Installing Node.js and npm from AlmaLinux packages"
     if rpm -q nodesource-release-nodistro >/dev/null 2>&1; then
         dnf remove -y nodesource-release-nodistro
     fi
@@ -283,15 +285,14 @@ ensure_nodejs_runtime() {
         rm -f -- "${repo_file}"
     done
 
-    dnf module reset -y nodejs
-    dnf module install -y "nodejs:${NODE_MAJOR}/common" --allowerasing
-    command -v node >/dev/null 2>&1 || die "o pacote Node.js não instalou o comando node."
-    command -v npm >/dev/null 2>&1 || die "o pacote Node.js não instalou o comando npm."
+    dnf install -y nodejs npm
+    command -v node >/dev/null 2>&1 || die "the Node.js package did not install the node command."
+    command -v npm >/dev/null 2>&1 || die "the Node.js package did not install the npm command."
     node_version="$(node --version)"
     installed_major="${node_version#v}"
     installed_major="${installed_major%%.*}"
-    [[ "${installed_major}" == "${NODE_MAJOR}" ]] \
-        || die "Node.js ${NODE_MAJOR}.x esperado, mas foi instalado ${node_version}."
+    (( installed_major >= 22 )) \
+        || die "Node.js 22 or newer is required for Node-RED 5.x; ${node_version} was installed."
 }
 
 nginx_cert_dir() {

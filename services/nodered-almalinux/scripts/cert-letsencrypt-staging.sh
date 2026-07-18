@@ -8,4 +8,4 @@ require_root
 load_env
 check_os
 issue_dns_cert staging
-ok "emissão Let's Encrypt STAGING validada; o certificado servido pelo Nginx não foi alterado."
+ok "STAGING Let's Encrypt issuance validated; the certificate served by Nginx was not changed."

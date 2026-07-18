@@ -8,14 +8,14 @@ require_root
 load_env
 ensure_service_account
 
-command -v node >/dev/null || die "Node.js não está instalado."
-command -v npm >/dev/null || die "npm não está instalado."
-command -v node-red >/dev/null || die "Node-RED não está instalado."
+command -v node >/dev/null || die "Node.js is not installed."
+command -v npm >/dev/null || die "npm is not installed."
+command -v node-red >/dev/null || die "Node-RED is not installed."
 npm list -g bcryptjs --depth=0 >/dev/null 2>&1 || npm install -g bcryptjs@latest
 
 resolve_auth_material
 
-log "A escrever ambiente protegido do Node-RED"
+log "Writing the protected Node-RED environment"
 env_tmp="$(mktemp)"
 cat > "${env_tmp}" <<EOF
 NODERED_BIND=${NODERED_BIND}
@@ -31,7 +31,7 @@ EOF
 install_atomic "${env_tmp}" /etc/node-red/environment 0640 root "${NODERED_GROUP}"
 rm -f "${env_tmp}"
 
-log "A gerar settings.js"
+log "Generating settings.js"
 settings_tmp="$(mktemp)"
 cat > "${settings_tmp}" <<'EOF'
 "use strict";
@@ -86,14 +86,14 @@ install_atomic "${settings_tmp}" "${NODERED_HOME}/settings.js" 0640 "${NODERED_U
 rm -f "${settings_tmp}"
 
 if [[ ! -f "${NODERED_HOME}/package.json" ]]; then
-    log "A inicializar package.json do userDir"
+    log "Initializing userDir package.json"
     runuser -u "${NODERED_USER}" -- \
         env HOME="${NODERED_HOME}" npm --prefix "${NODERED_HOME}" init -y >/dev/null
 fi
 chown -R "${NODERED_USER}:${NODERED_GROUP}" "${NODERED_HOME}"
 
 node_red_bin="$(command -v node-red)"
-log "A gerar unidade systemd"
+log "Generating the systemd unit"
 service_tmp="$(mktemp)"
 cat > "${service_tmp}" <<EOF
 [Unit]
@@ -137,7 +137,7 @@ rm -f "${service_tmp}"
 cert_dir="$(nginx_cert_dir)"
 install -d -o root -g root -m 0700 "${cert_dir}"
 
-log "A gerar configuração Nginx"
+log "Generating Nginx configuration"
 nginx_tmp="$(mktemp)"
 cat > "${nginx_tmp}" <<EOF
 map \$http_upgrade \$connection_upgrade {
@@ -191,4 +191,4 @@ systemctl daemon-reload
 restorecon -RF /etc/node-red "${NODERED_HOME}" /etc/nginx 2>/dev/null || true
 setsebool -P httpd_can_network_connect 1
 
-ok "configuração actualizada."
+ok "configuration updated."
