@@ -17,7 +17,7 @@ make init
 vi .env
 make lint
 make status
-make check-netbox-updates
+make check-for-updates
 ```
 
 `make init` creates `.env` with mode `0600` and never overwrites it. `.env`
@@ -33,10 +33,10 @@ in `NETBOX_SECRETS_FILE`, outside this repository.
 | `make lint` | Check Bash and Python syntax without root, network, or host changes. |
 | `make install` | Report that NetBox installation is intentionally unsupported by this manager. |
 | `make configure` | Report that NetBox configuration generation is intentionally unsupported by this manager. |
-| `make check-netbox-updates` | Fetch tags and show whether a stable NetBox update exists. |
-| `make list-netbox-tags` | Show recent stable NetBox tags. |
+| `make check-for-updates` | Fetch tags and show whether a stable NetBox update exists. |
+| `make list-tags` | Show recent stable NetBox tags. |
 | `make upgrade` | Interactively upgrade to the newest stable NetBox tag. |
-| `make upgrade-netbox VERSION=vX.Y.Z` | Interactively upgrade to one verified tag. |
+| `make upgrade VERSION=vX.Y.Z` | Interactively upgrade to one verified tag. |
 | `make upgrade-plugins` | Inspect available plugin updates and upgrade after confirmation. |
 | `make add-plugin PLUGIN=name` | Add one package name to `local_requirements.txt`. |
 | `make backup` | Back up configuration, secrets, requirements, Git revision, and PostgreSQL data. |
@@ -60,7 +60,7 @@ Use a separate instance configuration with
   `NETBOX_BACKUP_RETENTION_DAYS`.
 - The secrets parser only accepts simple `KEY=value` entries and exports them
   to the calling process; it does not source the secrets file as shell code.
-- `make check-netbox-updates`, `make list-netbox-tags`, and plugin update
+- `make check-for-updates`, `make list-tags`, and plugin update
   checks access upstream networks. `make lint` does not.
 - Review the NetBox release notes and take a backup before every upgrade. Test
   real upgrades on a disposable supported system first.

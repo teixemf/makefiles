@@ -5,7 +5,7 @@ ENV_FILE ?= .env
 ENV_ABS := $(abspath $(if $(filter /%,$(ENV_FILE)),$(ENV_FILE),$(CURDIR)/$(ENV_FILE)))
 SCRIPTS := $(CURDIR)/scripts
 
-.PHONY: help init lint check-env install configure check-netbox-updates list-netbox-tags upgrade upgrade-netbox \
+.PHONY: help init lint check-env install configure check-for-updates list-tags upgrade \
         upgrade-plugins add-plugin backup validate status restart logs versions
 
 define run_as_root
@@ -27,10 +27,9 @@ help:
 	  '  make lint                  validate scripts without machine changes' \
 	  '  make install               explain why installation is not provided' \
 	  '  make configure             explain why configuration is not provided' \
-	  '  make check-netbox-updates  fetch tags and report NetBox updates' \
-	  '  make list-netbox-tags      list the newest stable NetBox tags' \
-	  '  make upgrade               upgrade NetBox to the newest stable tag' \
-	  '  make upgrade-netbox VERSION=v4.6.2  upgrade NetBox to a tag' \
+	  '  make check-for-updates     fetch tags and report NetBox updates' \
+	  '  make list-tags             list the newest stable NetBox tags' \
+	  '  make upgrade [VERSION=vX.Y.Z]  upgrade to the newest stable tag or a tag' \
 	  '  make upgrade-plugins       review and upgrade configured plugins' \
 	  '  make add-plugin PLUGIN=name add a package to local_requirements.txt' \
 	  '  make backup                create a restricted NetBox backup' \
@@ -63,14 +62,10 @@ install:
 configure:
 	@ENV_FILE="$(ENV_ABS)" "$(SCRIPTS)/configure.sh"
 
-check-netbox-updates list-netbox-tags: check-env
+check-for-updates list-tags: check-env
 	@ENV_FILE="$(ENV_ABS)" "$(SCRIPTS)/updates.sh" "$@"
 
 upgrade: check-env
-	$(call run_as_root,upgrade.sh)
-
-upgrade-netbox: check-env
-	@test -n "$(VERSION)" || { echo "ERROR: use VERSION=vX.Y.Z." >&2; exit 1; }
 	$(call run_as_root,upgrade.sh)
 
 upgrade-plugins: check-env
