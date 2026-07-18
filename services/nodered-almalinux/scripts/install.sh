@@ -17,7 +17,7 @@ ensure_certbot_packages
 
 ensure_nodejs_runtime
 
-log "A instalar Node-RED ${NODERED_VERSION} e bcryptjs"
+log "A instalar Node-RED ${NODERED_VERSION}"
 install_global_node_red
 
 ensure_service_account

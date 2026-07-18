@@ -188,14 +188,14 @@ system_env_value() {
 generate_bcrypt() {
     local plaintext="$1"
     [[ -n "${plaintext}" ]] || die "não é possível gerar bcrypt de uma palavra-passe vazia."
-    local npm_root
-    npm_root="$(npm root -g)"
-    NODE_PATH="${npm_root}" node -e '
-const fs = require("fs");
-const bcrypt = require("bcryptjs");
-const input = fs.readFileSync(3, "utf8");
-process.stdout.write(bcrypt.hashSync(input, 10));
-' 3< <(printf '%s' "${plaintext}")
+    command -v htpasswd >/dev/null 2>&1 || die "htpasswd não está instalado."
+
+    local record hash
+    record="$(printf '%s\n' "${plaintext}" | htpasswd -nB -C 10 -i nodered)"
+    hash="${record#*:}"
+    [[ "${hash}" =~ ^\$2[aby]\$[0-9]{2}\$[./A-Za-z0-9]{53}$ ]] \
+        || die "htpasswd não devolveu um bcrypt válido."
+    printf '%s' "${hash}"
 }
 
 resolve_auth_material() {
@@ -298,7 +298,7 @@ ensure_nodejs_runtime() {
 install_global_node_red() {
     (
         umask 022
-        npm install -g "node-red@${NODERED_VERSION}" bcryptjs@latest
+        npm install -g "node-red@${NODERED_VERSION}"
     )
 
     ensure_global_node_red_permissions

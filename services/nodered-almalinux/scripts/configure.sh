@@ -11,7 +11,6 @@ ensure_service_account
 command -v node >/dev/null || die "Node.js não está instalado."
 command -v npm >/dev/null || die "npm não está instalado."
 npm list -g node-red --depth=0 >/dev/null 2>&1 || die "Node-RED não está instalado."
-npm list -g bcryptjs --depth=0 >/dev/null 2>&1 || npm install -g bcryptjs@latest
 
 resolve_auth_material
 
