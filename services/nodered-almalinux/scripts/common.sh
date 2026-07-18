@@ -44,7 +44,6 @@ load_env() {
     (( env_status == 0 )) || return "${env_status}"
 
     : "${FQDN:=}"
-    : "${NODE_MAJOR:=24}"
     : "${NODERED_VERSION:=latest}"
     : "${NODERED_USER:=nodered}"
     : "${NODERED_GROUP:=nodered}"
@@ -82,7 +81,7 @@ load_env() {
     : "${BACKUP_RETENTION_DAYS:=30}"
     : "${ALLOW_RHEL_COMPAT:=false}"
 
-    export FQDN NODE_MAJOR NODERED_VERSION NODERED_USER NODERED_GROUP
+    export FQDN NODERED_VERSION NODERED_USER NODERED_GROUP
     export NODERED_HOME NODERED_BIND NODERED_PORT NODERED_SESSION_SECONDS
     export NODERED_ADMIN_USER NODERED_ADMIN_PASSWORD NODERED_ADMIN_PASSWORD_HASH
     export NODE_RED_CREDENTIAL_SECRET NODERED_HTTP_NODE_AUTH
@@ -103,7 +102,6 @@ load_env() {
 validate_env() {
     [[ "${FQDN}" =~ ^([A-Za-z0-9]([A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+[A-Za-z]{2,63}$ ]] \
         || die "FQDN inválido: '${FQDN}'."
-    [[ "${NODE_MAJOR}" =~ ^[0-9]{2}$ ]] || die "NODE_MAJOR tem de ser numérico, por exemplo 24."
     [[ "${NODERED_VERSION}" =~ ^(latest|[0-9]+([.][0-9x*]+){0,2}(-[0-9A-Za-z.-]+)?)$ ]] \
         || die "NODERED_VERSION deve ser latest, 5, 5.x ou uma versão semver."
     [[ "${NODERED_USER}" =~ ^[a-z_][a-z0-9_-]*$ ]] || die "NODERED_USER inválido."
@@ -146,6 +144,10 @@ check_os() {
     [[ -r /etc/os-release ]] || die "não foi encontrado /etc/os-release."
     # shellcheck disable=SC1091
     source /etc/os-release
+    local os_major="${VERSION_ID:-}"
+    os_major="${os_major%%.*}"
+    [[ "${os_major}" =~ ^[0-9]+$ ]] && (( os_major >= 10 )) \
+        || die "este projecto requer AlmaLinux 10 ou superior. Detectado ${PRETTY_NAME:-${ID:-desconhecido}}."
     if [[ "${ID:-}" == "almalinux" ]]; then
         return
     fi
@@ -274,7 +276,7 @@ ensure_service_account() {
 ensure_nodejs_runtime() {
     local installed_major node_version repo_file
 
-    log "A instalar Node.js ${NODE_MAJOR}.x e npm através do AlmaLinux AppStream"
+    log "A instalar Node.js e npm através dos pacotes do AlmaLinux"
     if rpm -q nodesource-release-nodistro >/dev/null 2>&1; then
         dnf remove -y nodesource-release-nodistro
     fi
@@ -283,15 +285,14 @@ ensure_nodejs_runtime() {
         rm -f -- "${repo_file}"
     done
 
-    dnf module reset -y nodejs
-    dnf module install -y "nodejs:${NODE_MAJOR}/common" --allowerasing
+    dnf install -y nodejs npm
     command -v node >/dev/null 2>&1 || die "o pacote Node.js não instalou o comando node."
     command -v npm >/dev/null 2>&1 || die "o pacote Node.js não instalou o comando npm."
     node_version="$(node --version)"
     installed_major="${node_version#v}"
     installed_major="${installed_major%%.*}"
-    [[ "${installed_major}" == "${NODE_MAJOR}" ]] \
-        || die "Node.js ${NODE_MAJOR}.x esperado, mas foi instalado ${node_version}."
+    (( installed_major >= 22 )) \
+        || die "Node.js 22 ou superior é necessário para o Node-RED 5.x; foi instalado ${node_version}."
 }
 
 nginx_cert_dir() {
