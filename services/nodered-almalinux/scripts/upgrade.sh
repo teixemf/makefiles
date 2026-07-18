@@ -18,9 +18,8 @@ dnf upgrade -y \
 ensure_certbot_packages
 dnf upgrade -y certbot "$(certbot_plugin_package)"
 
-ensure_nodesource_repo
-dnf install -y nodejs --setopt=nodesource-nodejs.module_hotfixes=1 --allowerasing
-dnf upgrade -y nodejs --setopt=nodesource-nodejs.module_hotfixes=1
+ensure_nodejs_runtime
+dnf upgrade -y nodejs npm
 
 log "A actualizar Node-RED e bcryptjs"
 systemctl stop nodered 2>/dev/null || true
