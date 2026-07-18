@@ -296,12 +296,27 @@ ensure_nodejs_runtime() {
 }
 
 install_global_node_red() {
+    local installed_version
+
     (
         umask 022
         npm install -g "node-red@${NODERED_VERSION}"
     )
 
     ensure_global_node_red_permissions
+    installed_version="$(installed_node_red_version)"
+    ok "Node-RED ${NODERED_VERSION} (${installed_version}) instalado."
+}
+
+installed_node_red_version() {
+    local package_json
+
+    package_json="$(npm root -g)/node-red/package.json"
+    [[ -r "${package_json}" ]] || die "package.json do Node-RED não encontrado: ${package_json}"
+    node -e '
+const packageJson = require(process.argv[1]);
+process.stdout.write(packageJson.version);
+' "${package_json}"
 }
 
 ensure_global_node_red_permissions() {
