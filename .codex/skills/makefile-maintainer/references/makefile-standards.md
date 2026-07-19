@@ -21,6 +21,8 @@ semantics.
 - Place variables before rules.
 - Set `.DEFAULT_GOAL := help` explicitly.
 - Group targets in the lifecycle order defined by `AGENTS.md`.
+- Services using `.env.example` and `ENV_FILE` must expose `sync-env` between
+  `init` and `lint`.
 - Declare every action target in `.PHONY`.
 - Keep Makefiles thin; place complex recipes in Bash scripts.
 - Use descriptive and stable target names.
@@ -65,6 +67,8 @@ install: check-env
   into a script using `set -Eeuo pipefail`.
 - Do not ignore errors with `-` or `|| true` unless the state is proven optional
   and safe.
+- `sync-env` must treat `.env` and `.env.example` as data, never source them,
+  and must use an atomic replacement with a protected pre-change backup.
 - Quote paths and shell expansions.
 - Avoid destructive default recipes and never install from `help` or `lint`.
 

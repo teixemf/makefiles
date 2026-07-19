@@ -5,7 +5,7 @@ ENV_FILE ?= .env
 ENV_ABS := $(abspath $(ENV_FILE))
 SCRIPTS := $(CURDIR)/scripts
 
-.PHONY: help init check-env lint install configure bcrypt cert-selfsigned cert-le-stag \
+.PHONY: help init sync-env check-env lint install configure bcrypt cert-selfsigned cert-le-stag \
         cert-le-prod upgrade upgrade-nodes upgrade-system backup validate status status-full \
         restart logs logs-nginx logs-all versions
 
@@ -26,6 +26,7 @@ help:
 	  '' \
 	  '  make help               mostra esta ajuda' \
 	  '  make init               cria .env a partir de .env.example' \
+	  '  make sync-env           adiciona chaves novas sem substituir valores' \
 	  '  make lint               valida scripts e testes seguros' \
 	  '  make install            instalação completa; TLS auto-assinado por defeito' \
 	  '  make configure          volta a gerar settings.js, systemd e Nginx' \
@@ -60,10 +61,14 @@ init:
 	fi
 	@echo "Criado $(ENV_ABS). Edite FQDN, autenticação e, se necessário, credenciais DNS."
 
+sync-env:
+	@ENV_FILE="$(ENV_ABS)" "$(SCRIPTS)/sync-env.sh"
+
 lint:
 	@for script in "$(SCRIPTS)"/*.sh; do bash -n "$$script"; done
 	@"$(SCRIPTS)/test-listener-addresses.sh"
 	@"$(SCRIPTS)/test-version-output.sh"
+	@"$(SCRIPTS)/test-sync-env.sh"
 	@echo "Sintaxe Bash válida."
 
 check-env:

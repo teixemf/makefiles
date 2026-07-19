@@ -21,6 +21,7 @@ Cada serviço é utilizado exclusivamente a partir do seu próprio diretório:
 ```bash
 cd services/nodered-almalinux
 make init
+make sync-env
 vi .env
 make lint
 make install
@@ -39,6 +40,10 @@ services/<serviço>/
 Cada serviço é autónomo, documentado e inclui um alvo `lint`. Não existe um
 Makefile agregador na raiz do repositório. Segredos e configuração específica
 de cada máquina ficam em `.env`, que não deve ser adicionado ao Git.
+
+Todos os serviços seguem o contrato transversal de ambiente: `make sync-env`
+actualiza `.env` sem substituir valores existentes. Qualquer alteração a este
+contrato deve ser aplicada a todos os serviços existentes e futuros.
 
 As convenções obrigatórias para agentes e contribuições estão definidas em
 [`AGENTS.md`](AGENTS.md).

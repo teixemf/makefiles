@@ -4,8 +4,8 @@ set -Eeuo pipefail
 repo_root="${1:-$(pwd)}"
 services_root="${repo_root}/services"
 required_files=(Makefile .env.example .gitignore README.md scripts/common.sh)
-required_targets=(help init lint install configure validate status restart logs versions)
-required_scripts=(install configure validate)
+required_targets=(help init sync-env lint install configure validate status restart logs versions)
+required_scripts=(install configure validate sync-env)
 errors=0
 
 report_error() {
