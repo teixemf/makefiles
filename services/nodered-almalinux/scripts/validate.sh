@@ -8,6 +8,7 @@ load_env
 
 failures=0
 node_red_ready=false
+node_red_endpoints=''
 check() {
     local description="$1"
     shift
@@ -32,9 +33,12 @@ check "configuração Nginx válida" nginx -t
 check "serviço Nginx activo" systemctl is-active --quiet nginx
 
 for ((attempt = 1; attempt <= 30; attempt++)); do
+    node_red_endpoints="$(
+        ss -lntH "( sport = :${NODERED_PORT} )" 2>/dev/null \
+            | listener_local_endpoints
+    )"
     if systemctl is-active --quiet nodered \
-        && ss -lntH "( sport = :${NODERED_PORT} )" 2>/dev/null \
-        | grep -q "${NODERED_BIND}:${NODERED_PORT}"; then
+        && grep -Fxq "${NODERED_BIND}:${NODERED_PORT}" <<<"${node_red_endpoints}"; then
         node_red_ready=true
         break
     fi
@@ -51,7 +55,7 @@ else
     failures=$((failures + 1))
 fi
 
-if ss -lntH "( sport = :${NODERED_PORT} )" 2>/dev/null | grep -Eq '0\.0\.0\.0|\[::\]'; then
+if listener_has_wildcard_endpoint "${NODERED_PORT}" <<<"${node_red_endpoints}"; then
     warn "FALHOU: porta ${NODERED_PORT} exposta em todas as interfaces"
     failures=$((failures + 1))
 else

@@ -185,6 +185,15 @@ system_env_value() {
     sed -n "s/^${key}=//p" "${file}" | tail -n 1
 }
 
+listener_local_endpoints() {
+    awk 'NF >= 4 { print $4 }'
+}
+
+listener_has_wildcard_endpoint() {
+    local port="$1"
+    grep -Eq "^(0\\.0\\.0\\.0|\\[::\\]|::|\\*):${port}$"
+}
+
 generate_bcrypt() {
     local plaintext="$1"
     [[ -n "${plaintext}" ]] || die "não é possível gerar bcrypt de uma palavra-passe vazia."

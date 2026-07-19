@@ -106,7 +106,7 @@ alteram o sistema pedem `root` ou usam `sudo` automaticamente.
 | --- | --- |
 | `make help` | Mostra a ajuda dos alvos disponíveis. |
 | `make init` | Cria `.env` a partir de `.env.example`; falha se `.env` já existir. |
-| `make lint` | Valida a sintaxe Bash sem root, rede ou alterações no sistema. |
+| `make lint` | Valida a sintaxe Bash e testes seguros sem root, rede ou alterações no sistema. |
 | `make configure` | Regenera `settings.js`, o ambiente protegido, a unidade systemd e a configuração Nginx. |
 | `make bcrypt` | Pede uma password silenciosamente e imprime o respectivo bcrypt; instala `httpd-tools` se necessário. |
 | `make cert-selfsigned` | Gera/substitui o certificado TLS auto-assinado. |

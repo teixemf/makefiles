@@ -26,7 +26,7 @@ help:
 	  '' \
 	  '  make help               mostra esta ajuda' \
 	  '  make init               cria .env a partir de .env.example' \
-	  '  make lint               valida a sintaxe dos scripts' \
+	  '  make lint               valida scripts e testes seguros' \
 	  '  make install            instalação completa; TLS auto-assinado por defeito' \
 	  '  make configure          volta a gerar settings.js, systemd e Nginx' \
 	  '  make bcrypt             pede uma password e devolve o hash bcrypt' \
@@ -61,6 +61,7 @@ init:
 
 lint:
 	@for script in "$(SCRIPTS)"/*.sh; do bash -n "$$script"; done
+	@"$(SCRIPTS)/test-listener-addresses.sh"
 	@echo "Sintaxe Bash válida."
 
 check-env:
