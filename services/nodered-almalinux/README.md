@@ -21,7 +21,8 @@ vim .env                  # defina FQDN, autenticação e DNS
 chmod 600 .env
 make install              # instala Node-RED, Nginx, firewall e TLS inicial
 make validate             # valida a instalação
-make status               # mostra o estado resumido
+make status               # mostra versões e estado resumido
+make status-full          # acrescenta o estado systemd detalhado
 ```
 
 Por defeito, o Node-RED fica em `127.0.0.1:1880`, não é exposto directamente,
@@ -54,6 +55,7 @@ Depois de uma alteração, pode confirmar o resultado com:
 ```bash
 make validate
 make status
+make status-full
 ```
 
 ### TLS com Let's Encrypt
@@ -115,7 +117,8 @@ alteram o sistema pedem `root` ou usam `sudo` automaticamente.
 | `make upgrade-system` | Actualiza o sistema operativo e depois executa o upgrade do serviço. |
 | `make backup` | Cria um backup protegido da configuração, dados e Certbot. |
 | `make validate` | Verifica serviço, autenticação, TLS, portas e firewall. |
-| `make status` | Mostra o estado do Node-RED, Nginx, firewall e certificados. |
+| `make status` | Mostra versões, certificado, URL e o estado resumido dos serviços. |
+| `make status-full` | Mostra tudo de `make status` e acrescenta o estado systemd detalhado. |
 | `make restart` | Reinicia Node-RED e Nginx. |
 | `make logs` | Segue apenas o journal do Node-RED. |
 | `make logs-nginx` | Segue apenas os logs de acesso/erro do Nginx. |

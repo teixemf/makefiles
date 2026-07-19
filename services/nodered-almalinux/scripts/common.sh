@@ -11,6 +11,16 @@ ok()   { printf '\033[1;32mOK:\033[0m %s\n' "$*"; }
 warn() { printf '\033[1;33mAVISO:\033[0m %s\n' "$*" >&2; }
 die()  { printf '\033[1;31mERRO:\033[0m %s\n' "$*" >&2; exit 1; }
 
+display_heading() {
+    printf '\n\033[1;36m%s\033[0m\n' "$*"
+}
+
+display_row() {
+    local icon="$1" label="$2" value="$3" colour="${4:-0;37}"
+    printf '  %s  %-20s \033[%sm%s\033[0m\n' \
+        "${icon}" "${label}" "${colour}" "${value}"
+}
+
 require_root() {
     [[ ${EUID} -eq 0 ]] || die "este alvo tem de ser executado como root."
 }

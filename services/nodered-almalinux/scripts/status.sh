@@ -5,12 +5,40 @@ source "${SCRIPT_DIR}/common.sh"
 require_root
 load_env
 
-printf '%-28s %s\n' \
-    "Node-RED:" "$(systemctl is-active nodered 2>/dev/null || true)" \
-    "Nginx:" "$(systemctl is-active nginx 2>/dev/null || true)" \
-    "Firewalld:" "$(systemctl is-active firewalld 2>/dev/null || true)" \
-    "Certbot timer:" "$(systemctl is-active certbot-renew.timer 2>/dev/null || true)" \
-    "Certificado:" "$(cert_kind)" \
-    "URL:" "https://${FQDN}/"
+print_service_status() {
+    local label="$1" unit="$2" state icon colour
+    state="$(systemctl is-active "${unit}" 2>/dev/null || true)"
+    case "${state}" in
+        active)
+            icon='✅'
+            colour='1;32'
+            ;;
+        activating|reloading|deactivating)
+            icon='⏳'
+            colour='1;33'
+            ;;
+        inactive)
+            icon='⏸️'
+            colour='0;33'
+            ;;
+        failed)
+            icon='❌'
+            colour='1;31'
+            ;;
+        *)
+            icon='❔'
+            colour='0;37'
+            state="${state:-desconhecido}"
+            ;;
+    esac
+    display_row "${icon}" "${label}" "${state}" "${colour}"
+}
 
-systemctl --no-pager --full status nodered nginx certbot-renew.timer 2>/dev/null || true
+"${SCRIPT_DIR}/versions.sh"
+
+display_heading "📊 Estado resumido dos serviços"
+print_service_status "Node-RED" nodered
+print_service_status "Nginx" nginx
+print_service_status "Firewalld" firewalld
+print_service_status "Certbot timer" certbot-renew.timer
+display_row "🔗" "URL" "https://${FQDN}/" '1;34'
