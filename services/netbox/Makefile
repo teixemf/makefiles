@@ -5,7 +5,7 @@ ENV_FILE ?= .env
 ENV_ABS := $(abspath $(if $(filter /%,$(ENV_FILE)),$(ENV_FILE),$(CURDIR)/$(ENV_FILE)))
 SCRIPTS := $(CURDIR)/scripts
 
-.PHONY: help init lint check-env install configure check-for-updates list-tags upgrade \
+.PHONY: help init sync-env lint check-env install configure check-for-updates list-tags upgrade \
         upgrade-plugins add-plugin backup validate status status-full restart logs versions
 
 define run_as_root
@@ -24,6 +24,7 @@ help:
 	  '' \
 	  '  make help                  show this help' \
 	  '  make init                  create .env from .env.example' \
+	  '  make sync-env              add new example keys without replacing values' \
 	  '  make lint                  validate scripts without machine changes' \
 	  '  make install               explain why installation is not provided' \
 	  '  make configure             explain why configuration is not provided' \
@@ -48,9 +49,13 @@ init:
 	@chmod 600 "$(ENV_ABS)"
 	@echo "Created $(ENV_ABS). Review its paths before running an operation."
 
+sync-env:
+	@ENV_FILE="$(ENV_ABS)" "$(SCRIPTS)/sync-env.sh"
+
 lint:
 	@for script in "$(SCRIPTS)"/*.sh; do bash -n "$$script"; done
 	@"$(SCRIPTS)/test-version-output.sh"
+	@"$(SCRIPTS)/test-sync-env.sh"
 	@"$(SCRIPTS)/export_netbox_env.py" >/dev/null 2>&1 || test $$? -eq 2
 	@"$(SCRIPTS)/check_plugin_updates.py" >/dev/null 2>&1 || test $$? -eq 1
 	@echo "Valid Bash and Python syntax."

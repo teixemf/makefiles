@@ -11,7 +11,7 @@ serviços e aplicações nas minhas máquinas.
 
 | Serviço | Plataforma | Descrição |
 | --- | --- | --- |
-| [Node-RED](services/nodered-almalinux/) | AlmaLinux 9 | Node-RED, Nginx, TLS, systemd, firewall, backups e upgrades |
+| [Node-RED](services/nodered-almalinux/) | AlmaLinux 10 | Node-RED, Nginx, TLS, systemd, firewall, backups e upgrades |
 | [NetBox](services/netbox/) | Linux/systemd | Opera uma instalação NetBox existente: atualizações, plugins, validação, backups e controlo de serviços |
 
 ## Utilização
@@ -21,6 +21,7 @@ Cada serviço é utilizado exclusivamente a partir do seu próprio diretório:
 ```bash
 cd services/nodered-almalinux
 make init
+make sync-env
 vi .env
 make lint
 make install
@@ -40,11 +41,12 @@ Cada serviço é autónomo, documentado e inclui um alvo `lint`. Não existe um
 Makefile agregador na raiz do repositório. Segredos e configuração específica
 de cada máquina ficam em `.env`, que não deve ser adicionado ao Git.
 
-Todos os serviços seguem o contrato transversal de operação: `make versions`
-mostra versões, `make status` acrescenta o estado resumido e `make status-full`
-acrescenta o detalhe systemd. As versões são linhas únicas e usam cyan para
-software instalado; qualquer alteração a este contrato deve ser aplicada a
-todos os serviços existentes e futuros.
+Todos os serviços seguem o contrato transversal de ambiente: `make sync-env`
+actualiza `.env` sem substituir valores existentes. Qualquer alteração a este
+contrato deve ser aplicada a todos os serviços existentes e futuros. O
+contrato transversal de operação define ainda `make versions`, `make status`
+e `make status-full`: as versões são linhas únicas em cyan, o estado resumido
+acrescenta os serviços e o estado completo acrescenta o detalhe systemd.
 
 As convenções obrigatórias para agentes e contribuições estão definidas em
 [`AGENTS.md`](AGENTS.md).

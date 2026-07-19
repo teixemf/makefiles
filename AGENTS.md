@@ -75,16 +75,17 @@ in this order in `make help`:
 
 1. `help`
 2. `init`
-3. `lint`
-4. `install`
-5. `configure`
-6. `upgrade`
-7. `backup`
-8. `validate`
-9. `status`
-10. `restart`
-11. `logs`
-12. `versions`
+3. `sync-env`
+4. `lint`
+5. `install`
+6. `configure`
+7. `upgrade`
+8. `backup`
+9. `validate`
+10. `status`
+11. `restart`
+12. `logs`
+13. `versions`
 
 Service-specific targets, such as certificate management or plugin updates,
 must appear next to the relevant lifecycle phase. A non-applicable target may
@@ -97,7 +98,25 @@ be omitted, but the omission must be clear in the service `README.md`.
   directory, so direct invocation is reliable.
 - `make init` must create local configuration from `.env.example` without
   replacing an existing file.
+- `make sync-env` must merge new `.env.example` keys into an existing `.env`
+  without sourcing either file or replacing existing assignments.
 - `make lint` must not require `root`, network access, or machine changes.
+
+## Environment Synchronization Contract
+
+Every service that uses `.env.example` and `ENV_FILE` must provide
+`make sync-env`. It must read the service-local example as plain text, add only
+missing active assignment keys, preserve existing assignments byte-for-byte,
+and report local-only keys as potentially obsolete without removing them.
+It must reject duplicate active assignments, never print or execute values,
+preserve mode `0600`, create a protected backup before the first material
+change, and replace the file atomically. Repeated execution with no missing
+keys must not rewrite the file or create another backup. The target must work
+with custom `ENV_FILE` paths without root or network access.
+
+The synchronization contract is repository-wide. Any change to it must be
+implemented and tested for every existing service in the same pull request;
+new services must include the target and its regression tests before merging.
 
 ## Service Status and Version Contract
 

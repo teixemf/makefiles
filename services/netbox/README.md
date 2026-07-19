@@ -14,6 +14,7 @@ Run from this directory:
 
 ```bash
 make init
+make sync-env
 vi .env
 make lint
 make status
@@ -31,6 +32,7 @@ in `NETBOX_SECRETS_FILE`, outside this repository.
 | --- | --- |
 | `make help` | Show all supported operations. |
 | `make init` | Create a local `.env` from `.env.example`. |
+| `make sync-env` | Add newly documented keys without replacing local values. |
 | `make lint` | Check Bash and Python syntax without root, network, or host changes. |
 | `make install` | Report that NetBox installation is intentionally unsupported by this manager. |
 | `make configure` | Report that NetBox configuration generation is intentionally unsupported by this manager. |
