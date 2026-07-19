@@ -10,20 +10,22 @@ source /etc/os-release
 
 node_version="$(node --version 2>/dev/null || printf 'não instalado')"
 npm_version="$(npm --version 2>/dev/null || printf 'não instalado')"
-node_red_version="$(node-red --version 2>/dev/null || printf 'não instalado')"
+node_red_version_output="$(node-red --version 2>/dev/null || printf 'não instalado')"
+node_red_version="$(first_output_line "${node_red_version_output}")"
 nginx_version="$(nginx -v 2>&1 || printf 'não instalado')"
 openssl_version="$(openssl version 2>/dev/null || printf 'não instalado')"
 certbot_version="$(certbot --version 2>/dev/null || printf 'não instalado')"
 certificate_kind="$(cert_kind)"
+version_colour='0;36'
 
 display_heading "🧩 Versões e plataforma"
 display_row "💻" "Sistema operativo" "${PRETTY_NAME:-desconhecido}" '0;37'
-display_row "🟢" "Node.js" "${node_version}" '1;32'
-display_row "📦" "npm" "${npm_version}" '0;36'
-display_row "🔴" "Node-RED" "${node_red_version}" '1;31'
-display_row "🌐" "Nginx" "${nginx_version}" '0;36'
-display_row "🔑" "OpenSSL" "${openssl_version}" '0;37'
-display_row "🔄" "Certbot" "${certbot_version}" '0;36'
+display_row "🟢" "Node.js" "${node_version}" "${version_colour}"
+display_row "📦" "npm" "${npm_version}" "${version_colour}"
+display_row "🔀" "Node-RED" "${node_red_version}" "${version_colour}"
+display_row "🌐" "Nginx" "${nginx_version}" "${version_colour}"
+display_row "🔑" "OpenSSL" "${openssl_version}" "${version_colour}"
+display_row "🔄" "Certbot" "${certbot_version}" "${version_colour}"
 
 case "${certificate_kind}" in
     letsencrypt-prod)

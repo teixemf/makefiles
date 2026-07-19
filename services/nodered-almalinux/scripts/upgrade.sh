@@ -12,7 +12,7 @@ check_os
 
 log "A actualizar dependências RPM"
 dnf upgrade -y \
-    ca-certificates curl openssl nginx firewalld \
+    ca-certificates curl git openssl nginx firewalld \
     policycoreutils-python-utils httpd-tools tar gzip findutils
 
 ensure_certbot_packages

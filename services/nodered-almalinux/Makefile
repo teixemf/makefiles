@@ -63,6 +63,7 @@ init:
 lint:
 	@for script in "$(SCRIPTS)"/*.sh; do bash -n "$$script"; done
 	@"$(SCRIPTS)/test-listener-addresses.sh"
+	@"$(SCRIPTS)/test-version-output.sh"
 	@echo "Sintaxe Bash válida."
 
 check-env:

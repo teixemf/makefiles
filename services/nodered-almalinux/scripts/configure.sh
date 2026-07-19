@@ -23,6 +23,7 @@ NODERED_ADMIN_USER=${NODERED_ADMIN_USER}
 NODERED_ADMIN_PASSWORD_HASH=${ADMIN_HASH}
 NODERED_SESSION_SECONDS=${NODERED_SESSION_SECONDS}
 NODE_RED_CREDENTIAL_SECRET=${CREDENTIAL_SECRET}
+NODE_RED_ENABLE_PROJECTS=${NODE_RED_ENABLE_PROJECTS}
 NODERED_HTTP_NODE_AUTH=${NODERED_HTTP_NODE_AUTH}
 NODERED_HTTP_NODE_USER=${NODERED_HTTP_NODE_USER}
 NODERED_HTTP_NODE_PASSWORD_HASH=${HTTP_HASH}
@@ -64,6 +65,12 @@ const settings = {
             level: "info",
             metrics: false,
             audit: true
+        }
+    },
+
+    editorTheme: {
+        projects: {
+            enabled: (process.env.NODE_RED_ENABLE_PROJECTS || "true") === "true"
         }
     },
 
