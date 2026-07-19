@@ -160,6 +160,17 @@ Before completing a change:
    service;
 10. clearly state which VM or platform tests were not executed.
 
+## GitHub Workflow
+
+- Every pull request must be linked to an existing, open GitHub issue created
+  for the same change.
+- Never create, push, or request a pull request before confirming the issue
+  exists and recording its number in the pull request description.
+- The issue must describe the purpose and acceptance criteria of the change;
+  the pull request must explain how it implements that issue.
+- If issue creation or access is unavailable, stop the publication workflow and
+  leave the changes unsubmitted until the issue can be created.
+
 Test real installations only on a disposable VM or machine running a supported
 platform. Never run `make install` directly on the development machine merely
 to validate a change.
