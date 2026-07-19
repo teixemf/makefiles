@@ -26,7 +26,7 @@ help:
 	  '' \
 	  '  make help               mostra esta ajuda' \
 	  '  make init               cria .env a partir de .env.example' \
-	  '  make sync-env           adiciona chaves novas sem substituir valores' \
+	  '  make sync-env           adiciona chaves/comentários sem substituir valores' \
 	  '  make lint               valida scripts e testes seguros' \
 	  '  make install            instalação completa; TLS auto-assinado por defeito' \
 	  '  make configure          volta a gerar settings.js, systemd e Nginx' \

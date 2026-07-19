@@ -65,18 +65,47 @@ cleanup() {
 }
 trap cleanup EXIT
 
-declare -a added_keys=()
+declare -a added_keys=() context_lines=() missing_lines=() group_keys=()
+group_started=false
+
+flush_group() {
+  if ((${#missing_lines[@]} > 0)); then
+    if ((${#context_lines[@]} > 0)); then
+      printf '%s\n' "${context_lines[@]}" >> "${missing_file}"
+    fi
+    printf '%s\n' "${missing_lines[@]}" >> "${missing_file}"
+    added_keys+=("${group_keys[@]}")
+  fi
+  context_lines=()
+  missing_lines=()
+  group_keys=()
+  group_started=false
+}
+
 while IFS= read -r line || [[ -n "${line}" ]]; do
   key=""
   if [[ "${line}" =~ ^[[:space:]]*(export[[:space:]]+)?([A-Za-z_][A-Za-z0-9_]*)[[:space:]]*= ]]; then
     key="${BASH_REMATCH[2]}"
   fi
-  [[ -n "${key}" ]] || continue
-  if [[ -z "${existing_keys[${key}]+present}" ]]; then
-    printf '%s\n' "${line}" >> "${missing_file}"
-    added_keys+=("${key}")
+  if [[ -n "${key}" ]]; then
+    group_started=true
+    if [[ -z "${existing_keys[${key}]+present}" ]]; then
+      missing_lines+=("${line}")
+      group_keys+=("${key}")
+    fi
+  elif [[ "${line}" =~ ^[[:space:]]*(#.*)?$ ]]; then
+    if [[ "${group_started}" == true ]]; then
+      flush_group
+    fi
+    context_lines+=("${line}")
+  else
+    if [[ "${group_started}" == true ]]; then
+      flush_group
+    fi
+    context_lines=()
   fi
 done < "${EXAMPLE_FILE}"
+flush_group
 
 if ((${#added_keys[@]} > 0)); then
   tmp_file="$(mktemp "${env_dir}/.sync-env.XXXXXX")"
