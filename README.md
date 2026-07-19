@@ -43,7 +43,10 @@ de cada máquina ficam em `.env`, que não deve ser adicionado ao Git.
 
 Todos os serviços seguem o contrato transversal de ambiente: `make sync-env`
 actualiza `.env` sem substituir valores existentes. Qualquer alteração a este
-contrato deve ser aplicada a todos os serviços existentes e futuros.
+contrato deve ser aplicada a todos os serviços existentes e futuros. O
+contrato transversal de operação define ainda `make versions`, `make status`
+e `make status-full`: as versões são linhas únicas em cyan, o estado resumido
+acrescenta os serviços e o estado completo acrescenta o detalhe systemd.
 
 As convenções obrigatórias para agentes e contribuições estão definidas em
 [`AGENTS.md`](AGENTS.md).

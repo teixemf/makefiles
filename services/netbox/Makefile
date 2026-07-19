@@ -6,7 +6,7 @@ ENV_ABS := $(abspath $(if $(filter /%,$(ENV_FILE)),$(ENV_FILE),$(CURDIR)/$(ENV_F
 SCRIPTS := $(CURDIR)/scripts
 
 .PHONY: help init sync-env lint check-env install configure check-for-updates list-tags upgrade \
-        upgrade-plugins add-plugin backup validate status restart logs versions
+        upgrade-plugins add-plugin backup validate status status-full restart logs versions
 
 define run_as_root
 	@if [ "$$(id -u)" -eq 0 ]; then \
@@ -35,7 +35,8 @@ help:
 	  '  make add-plugin PLUGIN=name add a package to local_requirements.txt' \
 	  '  make backup                create a restricted NetBox backup' \
 	  '  make validate              run Django validation checks' \
-	  '  make status                show NetBox and dependency service state' \
+	  '  make status                show versions and NetBox dependency state' \
+	  '  make status-full          show status plus detailed systemd output' \
 	  '  make restart               restart NetBox application services' \
 	  '  make logs                  follow NetBox application logs' \
 	  '  make versions              show NetBox, Python, and plugin versions' \
@@ -53,6 +54,7 @@ sync-env:
 
 lint:
 	@for script in "$(SCRIPTS)"/*.sh; do bash -n "$$script"; done
+	@"$(SCRIPTS)/test-version-output.sh"
 	@"$(SCRIPTS)/test-sync-env.sh"
 	@"$(SCRIPTS)/export_netbox_env.py" >/dev/null 2>&1 || test $$? -eq 2
 	@"$(SCRIPTS)/check_plugin_updates.py" >/dev/null 2>&1 || test $$? -eq 1
@@ -87,6 +89,9 @@ validate: check-env
 
 status: check-env
 	@ENV_FILE="$(ENV_ABS)" "$(SCRIPTS)/status.sh"
+
+status-full: check-env
+	@ENV_FILE="$(ENV_ABS)" "$(SCRIPTS)/status-full.sh"
 
 restart: check-env
 	$(call run_as_root,restart.sh)

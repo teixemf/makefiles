@@ -18,6 +18,7 @@ make sync-env
 vi .env
 make lint
 make status
+make status-full
 make check-for-updates
 ```
 
@@ -43,10 +44,16 @@ in `NETBOX_SECRETS_FILE`, outside this repository.
 | `make add-plugin PLUGIN=name` | Add one package name to `local_requirements.txt`. |
 | `make backup` | Back up configuration, secrets, requirements, Git revision, and PostgreSQL data. |
 | `make validate` | Run `manage.py check` as the dedicated NetBox account. |
-| `make status` | Report NetBox, worker, PostgreSQL, and Redis unit states. |
+| `make status` | Show versions and the NetBox, worker, PostgreSQL, and Redis unit states. |
+| `make status-full` | Show `make status` plus detailed systemd status. |
 | `make restart` | Restart the NetBox web and worker services. |
 | `make logs` | Follow application and worker journals. |
 | `make versions` | Show the NetBox revision, Python, and installed plugin versions. |
+
+Status and version output follows the repository-wide service contract: version
+values are single-line cyan rows, `status` includes `versions`, and
+`status-full` adds detailed systemd output. The lint target includes a
+regression test for multiline upstream version output.
 
 Use a separate instance configuration with
 `make ENV_FILE=/path/instance.env status`.

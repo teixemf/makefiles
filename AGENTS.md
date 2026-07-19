@@ -118,6 +118,28 @@ The synchronization contract is repository-wide. Any change to it must be
 implemented and tested for every existing service in the same pull request;
 new services must include the target and its regression tests before merging.
 
+## Service Status and Version Contract
+
+Every existing and future service must implement this contract unless a
+documented platform limitation makes a target inapplicable:
+
+- `make versions` is the standalone version and certificate/platform view;
+- `make status` composes `versions` with a concise service summary;
+- `make status-full` composes `status` with detailed systemd status;
+- installed software versions are displayed as one labeled line each, using
+  cyan consistently; upstream commands that can return multiple lines must be
+  normalized to their first meaningful line;
+- state rows use consistent icons and colors for active, transitional,
+  inactive, failed, and unknown states;
+- each service includes a lint-executed regression test for multiline version
+  output when any upstream version command can produce it;
+- `Makefile`, `make help`, `README.md`, scripts, and lint tests must describe
+  the same contract.
+
+The contract is repository-wide: whenever it changes, the same change must be
+applied and validated for every existing service in the same pull request.
+New services must implement the current contract before they are added.
+
 ## Accounts and Privileges
 
 - Run each daemon under its own dedicated user and group.
