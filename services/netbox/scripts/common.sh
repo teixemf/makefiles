@@ -5,6 +5,45 @@ service_dir() { cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd; }
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 
+display_heading() {
+  printf '\n\033[1;36m%s\033[0m\n' "$*"
+}
+
+display_row() {
+  local icon="$1" label="$2" value="$3" colour="${4:-0;37}"
+  printf '  %s  %-24s \033[%sm%s\033[0m\n' \
+    "$icon" "$label" "$colour" "$value"
+}
+
+print_service_status() {
+  local label="$1" unit="$2" state icon colour
+  state="$(systemctl is-active "$unit" 2>/dev/null || true)"
+  case "$state" in
+    active)
+      icon='✅'
+      colour='1;32'
+      ;;
+    activating|reloading|deactivating)
+      icon='⏳'
+      colour='1;33'
+      ;;
+    inactive)
+      icon='⏸️'
+      colour='0;33'
+      ;;
+    failed)
+      icon='❌'
+      colour='1;31'
+      ;;
+    *)
+      icon='❔'
+      colour='0;37'
+      state="${state:-unknown}"
+      ;;
+  esac
+  display_row "$icon" "$label" "$state" "$colour"
+}
+
 require_env() {
   local env_file=${ENV_FILE:-}
   [[ -n "$env_file" && -r "$env_file" ]] || die "ENV_FILE is missing or unreadable. Run make init."
