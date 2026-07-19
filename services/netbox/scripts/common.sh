@@ -5,6 +5,11 @@ service_dir() { cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd; }
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 
+first_output_line() {
+  local output="$1"
+  printf '%s' "${output%%$'\n'*}"
+}
+
 display_heading() {
   printf '\n\033[1;36m%s\033[0m\n' "$*"
 }

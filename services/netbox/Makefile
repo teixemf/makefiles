@@ -50,6 +50,7 @@ init:
 
 lint:
 	@for script in "$(SCRIPTS)"/*.sh; do bash -n "$$script"; done
+	@"$(SCRIPTS)/test-version-output.sh"
 	@"$(SCRIPTS)/export_netbox_env.py" >/dev/null 2>&1 || test $$? -eq 2
 	@"$(SCRIPTS)/check_plugin_updates.py" >/dev/null 2>&1 || test $$? -eq 1
 	@echo "Valid Bash and Python syntax."

@@ -40,6 +40,12 @@ Cada serviço é autónomo, documentado e inclui um alvo `lint`. Não existe um
 Makefile agregador na raiz do repositório. Segredos e configuração específica
 de cada máquina ficam em `.env`, que não deve ser adicionado ao Git.
 
+Todos os serviços seguem o contrato transversal de operação: `make versions`
+mostra versões, `make status` acrescenta o estado resumido e `make status-full`
+acrescenta o detalhe systemd. As versões são linhas únicas e usam cyan para
+software instalado; qualquer alteração a este contrato deve ser aplicada a
+todos os serviços existentes e futuros.
+
 As convenções obrigatórias para agentes e contribuições estão definidas em
 [`AGENTS.md`](AGENTS.md).
 

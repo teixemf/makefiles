@@ -48,6 +48,11 @@ in `NETBOX_SECRETS_FILE`, outside this repository.
 | `make logs` | Follow application and worker journals. |
 | `make versions` | Show the NetBox revision, Python, and installed plugin versions. |
 
+Status and version output follows the repository-wide service contract: version
+values are single-line cyan rows, `status` includes `versions`, and
+`status-full` adds detailed systemd output. The lint target includes a
+regression test for multiline upstream version output.
+
 Use a separate instance configuration with
 `make ENV_FILE=/path/instance.env status`.
 

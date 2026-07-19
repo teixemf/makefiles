@@ -29,6 +29,12 @@ Por defeito, o Node-RED fica em `127.0.0.1:1880`, não é exposto directamente,
 e o Nginx publica as portas 80/443. O `make install` instala um certificado
 auto-assinado se ainda não existir.
 
+Este serviço segue o contrato transversal do repositório: `make versions`
+mostra versões e plataforma, `make status` acrescenta o estado resumido e
+`make status-full` acrescenta o detalhe systemd. As versões de software são
+linhas únicas em cyan e o `make lint` inclui testes de regressão para saídas
+multiline.
+
 ### Aplicar alterações
 
 Depois de alterar uma variável de configuração no `.env`, o comando normal é
