@@ -1,8 +1,8 @@
-# Node-RED em AlmaLinux com Make
+# Node-RED em AlmaLinux 10 com Make
 
 Instalador repetível para:
 
-- Node.js 24 e Node-RED;
+- Node.js fornecido pelo AlmaLinux (versão 22 ou superior) e Node-RED;
 - conta de sistema reservada, sem login;
 - autenticação `adminAuth`;
 - Nginx como reverse proxy;
@@ -10,6 +10,15 @@ Instalador repetível para:
 - Let's Encrypt DNS-01 em staging ou produção;
 - renovação automática por `systemd`;
 - backup e upgrade.
+
+## Plataforma suportada
+
+A plataforma mínima suportada é AlmaLinux 10. Versões posteriores do
+AlmaLinux são aceites desde que forneçam uma versão do Node.js compatível com
+a versão configurada do Node-RED.
+
+Outros sistemas derivados de RHEL não fazem parte da plataforma principal e
+só são aceites explicitamente com `ALLOW_RHEL_COMPAT=true`.
 
 ## Arranque habitual
 
