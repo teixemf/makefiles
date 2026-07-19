@@ -5,11 +5,37 @@ source "${SCRIPT_DIR}/common.sh"
 require_root
 load_env
 
-printf 'OS:          '; source /etc/os-release; printf '%s\n' "${PRETTY_NAME:-desconhecido}"
-printf 'Node.js:     '; node --version 2>/dev/null || true
-printf 'npm:         '; npm --version 2>/dev/null || true
-printf 'Node-RED:    '; node-red --version 2>/dev/null || true
-printf 'Nginx:       '; nginx -v 2>&1 || true
-printf 'OpenSSL:     '; openssl version 2>/dev/null || true
-printf 'Certbot:     '; certbot --version 2>/dev/null || printf 'não instalado\n'
-printf 'Certificado: %s\n' "$(cert_kind)"
+# shellcheck disable=SC1091
+source /etc/os-release
+
+node_version="$(node --version 2>/dev/null || printf 'não instalado')"
+npm_version="$(npm --version 2>/dev/null || printf 'não instalado')"
+node_red_version="$(node-red --version 2>/dev/null || printf 'não instalado')"
+nginx_version="$(nginx -v 2>&1 || printf 'não instalado')"
+openssl_version="$(openssl version 2>/dev/null || printf 'não instalado')"
+certbot_version="$(certbot --version 2>/dev/null || printf 'não instalado')"
+certificate_kind="$(cert_kind)"
+
+display_heading "🧩 Versões e plataforma"
+display_row "💻" "Sistema operativo" "${PRETTY_NAME:-desconhecido}" '0;37'
+display_row "🟢" "Node.js" "${node_version}" '1;32'
+display_row "📦" "npm" "${npm_version}" '0;36'
+display_row "🔴" "Node-RED" "${node_red_version}" '1;31'
+display_row "🌐" "Nginx" "${nginx_version}" '0;36'
+display_row "🔑" "OpenSSL" "${openssl_version}" '0;37'
+display_row "🔄" "Certbot" "${certbot_version}" '0;36'
+
+case "${certificate_kind}" in
+    letsencrypt-prod)
+        display_row "🔒" "Certificado" "${certificate_kind}" '1;32'
+        ;;
+    letsencrypt-staging|auto-assinado)
+        display_row "🧪" "Certificado" "${certificate_kind}" '1;33'
+        ;;
+    ausente)
+        display_row "❌" "Certificado" "${certificate_kind}" '1;31'
+        ;;
+    *)
+        display_row "❔" "Certificado" "${certificate_kind}" '0;37'
+        ;;
+esac

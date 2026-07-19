@@ -6,7 +6,7 @@ ENV_ABS := $(abspath $(ENV_FILE))
 SCRIPTS := $(CURDIR)/scripts
 
 .PHONY: help init check-env lint install configure bcrypt cert-selfsigned cert-le-stag \
-        cert-le-prod upgrade upgrade-nodes upgrade-system backup validate status \
+        cert-le-prod upgrade upgrade-nodes upgrade-system backup validate status status-full \
         restart logs logs-nginx logs-all versions
 
 define run_as_root
@@ -38,7 +38,8 @@ help:
 	  '  make upgrade-system     dnf upgrade completo + make upgrade' \
 	  '  make backup             cria backup local protegido' \
 	  '  make validate           valida serviço, autenticação, TLS e firewall' \
-	  '  make status             estado resumido' \
+	  '  make status             versões e estado resumido' \
+	  '  make status-full        versões, resumo e estado systemd detalhado' \
 	  '  make restart            reinicia Node-RED e Nginx' \
 	  '  make logs               segue apenas os logs do Node-RED' \
 	  '  make logs-nginx         segue apenas os logs do Nginx' \
@@ -104,6 +105,9 @@ validate: check-env
 
 status: check-env
 	$(call run_as_root,status.sh)
+
+status-full: check-env
+	$(call run_as_root,status-full.sh)
 
 restart: check-env
 	$(call run_as_root,restart.sh)
