@@ -26,6 +26,7 @@ Execute os comandos a partir de `services/nodered-almalinux/`:
 
 ```bash
 make init                 # cria .env sem substituir um ficheiro existente
+make sync-env             # adiciona chaves novas sem substituir valores
 vim .env                  # defina FQDN, autenticação e DNS
 chmod 600 .env
 make install              # instala Node-RED, Nginx, firewall e TLS inicial
@@ -117,6 +118,7 @@ alteram o sistema pedem `root` ou usam `sudo` automaticamente.
 | --- | --- |
 | `make help` | Mostra a ajuda dos alvos disponíveis. |
 | `make init` | Cria `.env` a partir de `.env.example`; falha se `.env` já existir. |
+| `make sync-env` | Adiciona chaves novas do exemplo sem substituir valores locais. |
 | `make lint` | Valida a sintaxe Bash e testes seguros sem root, rede ou alterações no sistema. |
 | `make configure` | Regenera `settings.js`, o ambiente protegido, a unidade systemd e a configuração Nginx. |
 | `make bcrypt` | Pede uma password silenciosamente e imprime o respectivo bcrypt; instala `httpd-tools` se necessário. |
