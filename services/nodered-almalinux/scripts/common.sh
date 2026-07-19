@@ -65,6 +65,7 @@ load_env() {
     : "${NODERED_ADMIN_PASSWORD:=}"
     : "${NODERED_ADMIN_PASSWORD_HASH:=}"
     : "${NODE_RED_CREDENTIAL_SECRET:=}"
+    : "${NODE_RED_ENABLE_PROJECTS:=true}"
     : "${NODERED_HTTP_NODE_AUTH:=false}"
     : "${NODERED_HTTP_NODE_USER:=api}"
     : "${NODERED_HTTP_NODE_PASSWORD:=}"
@@ -94,7 +95,8 @@ load_env() {
     export FQDN NODERED_VERSION NODERED_USER NODERED_GROUP
     export NODERED_HOME NODERED_BIND NODERED_PORT NODERED_SESSION_SECONDS
     export NODERED_ADMIN_USER NODERED_ADMIN_PASSWORD NODERED_ADMIN_PASSWORD_HASH
-    export NODE_RED_CREDENTIAL_SECRET NODERED_HTTP_NODE_AUTH
+    export NODE_RED_CREDENTIAL_SECRET NODE_RED_ENABLE_PROJECTS
+    export NODERED_HTTP_NODE_AUTH
     export NODERED_HTTP_NODE_USER NODERED_HTTP_NODE_PASSWORD
     export NODERED_HTTP_NODE_PASSWORD_HASH SELF_SIGNED_DAYS
     export CERTBOT_EMAIL CERTBOT_DNS_PROVIDER CERTBOT_DNS_PROPAGATION_SECONDS
@@ -146,6 +148,7 @@ validate_env() {
         [[ "${certbot_path}" =~ ^/[A-Za-z0-9._/-]+$ ]] \
             || die "os caminhos Certbot têm de ser absolutos e sem espaços."
     done
+    [[ "${NODE_RED_ENABLE_PROJECTS}" =~ ^(true|false)$ ]] || die "NODE_RED_ENABLE_PROJECTS deve ser true ou false."
     [[ "${NODERED_HTTP_NODE_AUTH}" =~ ^(true|false)$ ]] || die "NODERED_HTTP_NODE_AUTH deve ser true ou false."
     [[ "${ALLOW_RHEL_COMPAT}" =~ ^(true|false)$ ]] || die "ALLOW_RHEL_COMPAT deve ser true ou false."
 }

@@ -163,6 +163,7 @@ com `npm install -g`.
 | `NODERED_ADMIN_PASSWORD` | Password em claro usada apenas durante a configuração para gerar bcrypt. Prefira o hash. |
 | `NODERED_ADMIN_PASSWORD_HASH` | Hash bcrypt do administrador. Quando definido, tem prioridade sobre `NODERED_ADMIN_PASSWORD`. |
 | `NODE_RED_CREDENTIAL_SECRET` | Segredo usado para cifrar credenciais guardadas nos flows. Não o altere depois de começar a usar o serviço. `make init` tenta gerar um valor. |
+| `NODE_RED_ENABLE_PROJECTS` | Activa (`true`) ou desactiva (`false`) o modo Projects do editor Node-RED. O valor predefinido é `true`; o instalador inclui Git para que cada projecto possa versionar os flows e respectivos ficheiros. |
 | `NODERED_HTTP_NODE_AUTH` | `true` protege também os endpoints HTTP In; `false` desactiva essa camada. |
 | `NODERED_HTTP_NODE_USER` | Utilizador da autenticação dos endpoints HTTP In. |
 | `NODERED_HTTP_NODE_PASSWORD` | Password em claro usada apenas para gerar o hash HTTP. |
