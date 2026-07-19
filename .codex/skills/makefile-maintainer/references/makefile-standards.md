@@ -68,7 +68,8 @@ install: check-env
 - Do not ignore errors with `-` or `|| true` unless the state is proven optional
   and safe.
 - `sync-env` must treat `.env` and `.env.example` as data, never source them,
-  and must use an atomic replacement with a protected pre-change backup.
+  copy associated comment blocks with missing keys, preserve their ordering,
+  and use an atomic replacement with a protected pre-change backup.
 - Quote paths and shell expansions.
 - Avoid destructive default recipes and never install from `help` or `lint`.
 

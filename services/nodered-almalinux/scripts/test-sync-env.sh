@@ -39,6 +39,11 @@ grep -Fqx 'NODERED_ADMIN_PASSWORD=private-password-value' "${env_file}"
 grep -Fqx 'NODE_RED_CREDENTIAL_SECRET="private-token-value"' "${env_file}"
 grep -Fqx "${bcrypt_line}" "${env_file}"
 grep -Fqx 'OBSOLETE_LOCAL=keep-this-value' "${env_file}"
+[[ "$(grep -Fxc '# Runtime Node-RED. O instalador usa o Node.js fornecido pelo AlmaLinux;' "${env_file}")" == 1 ]]
+if grep -Fqx '# Nome DNS usado pelo Nginx e pelos certificados.' "${env_file}"; then
+  printf 'comentário de uma variável já presente foi adicionado.\n' >&2
+  exit 1
+fi
 head -n "${original_line_count}" "${env_file}" > "${TEST_DIR}/preserved-prefix.env"
 cmp -s "${original_file}" "${TEST_DIR}/preserved-prefix.env"
 [[ "$(stat -c '%a' "${env_file}")" == 600 ]]

@@ -106,8 +106,11 @@ be omitted, but the omission must be clear in the service `README.md`.
 
 Every service that uses `.env.example` and `ENV_FILE` must provide
 `make sync-env`. It must read the service-local example as plain text, add only
-missing active assignment keys, preserve existing assignments byte-for-byte,
+missing active assignment keys together with their contiguous associated
+comment blocks, preserve source ordering and existing assignments byte-for-byte,
 and report local-only keys as potentially obsolete without removing them.
+Shared comments for adjacent assignments must be copied once, and comments for
+groups whose assignments are all already present must not be added.
 It must reject duplicate active assignments, never print or execute values,
 preserve mode `0600`, create a protected backup before the first material
 change, and replace the file atomically. Repeated execution with no missing

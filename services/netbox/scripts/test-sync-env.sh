@@ -39,6 +39,8 @@ grep -Fqx "${bcrypt_line}" "${env_file}"
 grep -Fqx 'TEST_PASSWORD=private-password-value' "${env_file}"
 grep -Fqx 'TEST_TOKEN=private-token-value' "${env_file}"
 grep -Fqx 'OBSOLETE_LOCAL=keep-this-value' "${env_file}"
+[[ "$(grep -Fxc '# Paths for an existing NetBox installation. Values are interpreted as Bash.' "${env_file}")" == 1 ]]
+[[ "$(grep -Fxc "# NetBox's dedicated system account and systemd units." "${env_file}")" == 1 ]]
 head -n "${original_line_count}" "${env_file}" > "${TEST_DIR}/preserved-prefix.env"
 cmp -s "${original_file}" "${TEST_DIR}/preserved-prefix.env"
 [[ "$(stat -c '%a' "${env_file}")" == 600 ]]

@@ -24,7 +24,7 @@ help:
 	  '' \
 	  '  make help                  show this help' \
 	  '  make init                  create .env from .env.example' \
-	  '  make sync-env              add new example keys without replacing values' \
+	  '  make sync-env              add new keys/comments without replacing values' \
 	  '  make lint                  validate scripts without machine changes' \
 	  '  make install               explain why installation is not provided' \
 	  '  make configure             explain why configuration is not provided' \
