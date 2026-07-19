@@ -21,6 +21,11 @@ display_row() {
         "${icon}" "${label}" "${colour}" "${value}"
 }
 
+first_output_line() {
+    local output="$1"
+    printf '%s' "${output%%$'\n'*}"
+}
+
 require_root() {
     [[ ${EUID} -eq 0 ]] || die "este alvo tem de ser executado como root."
 }
