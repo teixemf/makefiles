@@ -11,7 +11,7 @@ serviços e aplicações nas minhas máquinas.
 
 | Serviço | Plataforma | Descrição |
 | --- | --- | --- |
-| [Node-RED](services/nodered-almalinux/) | AlmaLinux 9 | Node-RED, Nginx, TLS, systemd, firewall, backups e upgrades |
+| [Node-RED](services/nodered-almalinux/) | AlmaLinux 10 | Node-RED, Nginx, TLS, systemd, firewall, backups e upgrades |
 | [NetBox](services/netbox/) | Linux/systemd | Opera uma instalação NetBox existente: atualizações, plugins, validação, backups e controlo de serviços |
 
 ## Utilização
